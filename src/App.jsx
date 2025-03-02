@@ -17,7 +17,9 @@ const App = () => {
     notUrgentNotImportant: [],
   });
   const [draggedItem, setDraggedItem] = useState(null);
-  
+  const [editingTask, setEditingTask] = useState(null);
+  const [editedText, setEditedText] = useState("");
+
   const addTask = () => {
     if (task.trim() === "") return;
     setTasks(prev => ({
@@ -79,6 +81,25 @@ const App = () => {
     });
   };
 
+  const startEditing = (quadrant, index, text) => {
+    setEditingTask({ quadrant, index });
+    setEditedText(text);
+  };
+
+  const saveEditedTask = () => {
+    if (!editingTask) return;
+    const { quadrant, index } = editingTask;
+    setTasks(prev => {
+      const newTasks = { ...prev };
+      newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
+        i === index ? { ...task, text: editedText } : task
+      );
+      return newTasks;
+    });
+    setEditingTask(null);
+    setEditedText("");
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP']">
       <div className="max-w-4xl mx-auto">
@@ -90,7 +111,7 @@ const App = () => {
           <input
             type="text"
             className="flex-1 p-3 border-none outline-none text-gray-800 text-lg"
-            placeholder="Enter a new task..."
+            placeholder="Enter a new task..double click on exsiting task to edit it..)"
             value={task}
             onChange={(e) => setTask(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -124,21 +145,41 @@ const App = () => {
                     }`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, key, index)}
-                    onClick={() => toggleComplete(key, index)}
                   >
-                    <span>{task.text}</span>
+                    {editingTask?.quadrant === key && editingTask.index === index ? (
+                      <input
+                        type="text"
+                        value={editedText}
+                        onChange={(e) => setEditedText(e.target.value)}
+                        onBlur={saveEditedTask}
+                        onKeyDown={(e) => e.key === "Enter" && saveEditedTask()}
+                        autoFocus
+                        className="flex-1 p-1 border border-gray-300 rounded"
+                      />
+                    ) : (
+                      <span onDoubleClick={() => startEditing(key, index, task.text)}>
+                        {task.text}
+                      </span>
+                    )}
+                    <button
+                      className="ml-2 text-xs text-gray-500 hover:text-black"
+                      onClick={() => toggleComplete(key, index)}
+                    >
+                      ✅
+                    </button>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
+        
         <div className="mt-6 text-center">
           <button
             onClick={clearCompletedTasks}
             className="px-4 py-2 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
           >
-             🗑️Clear Completed Tasks
+             🗑️ Clear Completed Tasks
             </button>
         </div>
       </div>
@@ -147,4 +188,3 @@ const App = () => {
 };
 
 export default App;
-
