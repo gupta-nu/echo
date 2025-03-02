@@ -1,6 +1,5 @@
 # 📝 Task Organizer – Eisenhower Matrix
-
-A **powerful, interactive, and intuitive task management tool** built with **React** and **Tailwind CSS**. This application helps users **prioritize tasks efficiently** using the **Eisenhower Matrix**, a well-known productivity framework that categorizes tasks based on **urgency and importance**.
+A **simple and efficient task manager** built with **React** and **Tailwind CSS**, designed for users with **ADHD and dyslexia**. It uses the **Eisenhower Matrix** to prioritize tasks by urgency and importance, making organization straightforward. Features include **quick task entry, drag-and-drop organization, and a clean, distraction-free interface** for better focus and productivity.
 
 ## 📌 Live Demo  
 🚀 [Check out the live version on Vercel](https://your-vercel-app-url.vercel.app)  
