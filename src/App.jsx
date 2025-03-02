@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 const categories = {
-  urgentImportant: { title: "Important and Urgent", color: "bg-white border-gray-400" },
-  notUrgentImportant: { title: "Important but Not Urgent", color: "bg-white border-gray-400" },
-  urgentNotImportant: { title: "Urgent but Not Important", color: "bg-white border-gray-400" },
-  notUrgentNotImportant: { title: "Neither Important nor Urgent", color: "bg-white border-gray-400" },
+  urgentImportant: { title: "Important and Urgent", color: "bg-white border-gray-300" },
+  notUrgentImportant: { title: "Important but Not Urgent", color: "bg-white border-gray-300" },
+  urgentNotImportant: { title: "Urgent but Not Important", color: "bg-white border-gray-300" },
+  notUrgentNotImportant: { title: "Neither Important nor Urgent", color: "bg-white border-gray-300" },
 };
 
 const App = () => {
@@ -80,23 +80,23 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-200 p-6 font-['Noto Sans JP']">
+    <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP']">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-semibold text-center mb-8 text-gray-900 tracking-wide">
+        <h1 className="text-2xl font-medium text-center mb-8 text-gray-800 tracking-wide">
           Task Organizer
         </h1>
 
-        <div className="flex items-center gap-3 mb-6 bg-white p-3 rounded-lg shadow-md border border-gray-400 focus-within:ring-2 focus-within:ring-gray-500 transition-all">
+        <div className="flex items-center gap-3 mb-6 bg-white p-3 rounded-lg shadow-md border border-gray-300">
           <input
             type="text"
-            className="flex-1 p-3 border-none outline-none text-gray-900 text-lg placeholder-gray-500"
+            className="flex-1 p-3 border-none outline-none text-gray-800 text-lg"
             placeholder="Enter a new task..."
             value={task}
             onChange={(e) => setTask(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           <select
-            className="p-2 border border-gray-400 rounded-md bg-white text-gray-900 hover:bg-gray-100 transition"
+            className="p-2 border border-gray-300 rounded-md bg-white text-gray-700"
             value={selectedQuadrant}
             onChange={(e) => setSelectedQuadrant(e.target.value)}
           >
@@ -110,17 +110,17 @@ const App = () => {
           {Object.entries(categories).map(([key, { title, color }]) => (
             <div
               key={key}
-              className={`p-4 rounded-lg border ${color} shadow-md hover:shadow-lg transition-all min-h-[250px]`}
+              className={`p-4 rounded-md border ${color} shadow-sm min-h-[250px]`}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(key)}
             >
-              <h2 className="text-lg font-semibold mb-3 text-gray-800">{title}</h2>
+              <h2 className="text-lg font-medium mb-3 text-gray-700">{title}</h2>
               <ul className="space-y-2">
                 {tasks[key].map((task, index) => (
                   <li
                     key={index}
-                    className={`p-3 bg-gray-50 border border-gray-400 rounded-lg shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 hover:bg-gray-100 ${
-                      task.completed ? 'line-through text-gray-500' : ''
+                    className={`p-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
+                      task.completed ? 'line-through text-gray-400' : ''
                     }`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, key, index)}
@@ -136,10 +136,10 @@ const App = () => {
         <div className="mt-6 text-center">
           <button
             onClick={clearCompletedTasks}
-            className="px-5 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all shadow-md hover:shadow-lg"
+            className="px-4 py-2 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
           >
-            Clear Completed Tasks
-          </button>
+             🗑️Clear Completed Tasks
+            </button>
         </div>
       </div>
     </div>
