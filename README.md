@@ -2,7 +2,7 @@
 A **simple and efficient task manager** built with **React** and **Tailwind CSS**, designed for users with **ADHD and dyslexia**. It uses the **Eisenhower Matrix** to prioritize tasks by urgency and importance, making organization straightforward. Features include **quick task entry, drag-and-drop organization, and a clean, distraction-free interface** for better focus and productivity.
 
 ## 📌 Live Demo  
-🚀 [Check out the live version on Vercel](https://your-vercel-app-url.vercel.app)  
+🚀 [Check out the live version on Vercel](https://vercel.com/gupta-nus-projects/echo/EhLsrYxrUkYvGMYQKbtzKyBSNKWX)  
 
 ---
 
