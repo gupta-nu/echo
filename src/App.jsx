@@ -56,8 +56,20 @@ const App = () => {
   const toggleComplete = (quadrant, index) => {
     setTasks(prev => {
       const newTasks = { ...prev };
-      newTasks[quadrant][index].completed = !newTasks[quadrant][index].completed;
-      return { ...newTasks };
+      newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
+        i === index ? { ...task, completed: !task.completed } : task
+      );
+      return newTasks;
+    });
+  };
+
+  const clearCompletedTasks = () => {
+    setTasks(prev => {
+      const newTasks = {};
+      Object.keys(prev).forEach(key => {
+        newTasks[key] = prev[key].filter(task => !task.completed);
+      });
+      return newTasks;
     });
   };
 
@@ -106,27 +118,27 @@ const App = () => {
                 {tasks[key].map((task, index) => (
                   <li
                     key={index}
-                    className={`p-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm cursor-move flex items-center justify-between ${task.completed ? 'line-through text-gray-400' : ''}`}
+                    className={`p-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
+                      task.completed ? 'line-through text-gray-400' : ''
+                    }`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, key, index)}
+                    onClick={() => toggleComplete(key, index)}
                   >
-                    <span onClick={() => toggleComplete(key, index)} className="cursor-pointer">{task.text}</span>
-                    <button
-                      onClick={() => {
-                        setTasks(prev => ({
-                          ...prev,
-                          [key]: prev[key].filter((_, i) => i !== index)
-                        }));
-                      }}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
+                    <span>{task.text}</span>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
+        </div>
+        <div className="mt-6 text-center">
+          <button
+            onClick={clearCompletedTasks}
+            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          >
+            Clear Completed Tasks
+          </button>
         </div>
       </div>
     </div>
