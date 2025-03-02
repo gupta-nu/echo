@@ -136,9 +136,9 @@ const App = () => {
         <div className="mt-6 text-center">
           <button
             onClick={clearCompletedTasks}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
+            className="px-4 py-2 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
           >
-            Clear Completed Tasks
+             🗑️Clear Completed Tasks
             </button>
         </div>
       </div>
