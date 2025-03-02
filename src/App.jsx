@@ -41,6 +41,11 @@ const App = () => {
     e.dataTransfer.effectAllowed = "move";
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
   const handleDrop = (targetQuadrant) => {
     if (!draggedItem) return;
     const { quadrant: sourceQuadrant, index: sourceIndex, task } = draggedItem;
@@ -76,24 +81,43 @@ const App = () => {
     });
   };
 
+  const startEditing = (quadrant, index, text) => {
+    setEditingTask({ quadrant, index });
+    setEditedText(text);
+  };
+
+  const saveEditedTask = () => {
+    if (!editingTask) return;
+    const { quadrant, index } = editingTask;
+    setTasks(prev => {
+      const newTasks = { ...prev };
+      newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
+        i === index ? { ...task, text: editedText } : task
+      );
+      return newTasks;
+    });
+    setEditingTask(null);
+    setEditedText("");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-6 font-['Noto Sans JP']">
+    <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP']">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-medium text-center mb-6 text-gray-800 tracking-wide">
-          Echo Task Organizer
+        <h1 className="text-2xl font-medium text-center mb-8 text-gray-800 tracking-wide">
+          Task Organizer
         </h1>
 
-        <div className="flex flex-col md:flex-row items-center gap-3 mb-6 bg-white p-3 rounded-lg shadow-md border border-gray-300">
+        <div className="flex items-center gap-3 mb-6 bg-white p-3 rounded-lg shadow-md border border-gray-300">
           <input
             type="text"
-            className="flex-1 p-3 border rounded-lg text-gray-800 text-lg w-full"
-            placeholder="Enter a task..."
+            className="flex-1 p-3 border-none outline-none text-gray-800 text-lg"
+            placeholder="Enter a new task..double click on exsiting task to edit it..)"
             value={task}
             onChange={(e) => setTask(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           <select
-            className="p-2 border border-gray-300 rounded-md bg-white text-gray-700 w-full md:w-auto"
+            className="p-2 border border-gray-300 rounded-md bg-white text-gray-700"
             value={selectedQuadrant}
             onChange={(e) => setSelectedQuadrant(e.target.value)}
           >
@@ -107,7 +131,8 @@ const App = () => {
           {Object.entries(categories).map(([key, { title, color }]) => (
             <div
               key={key}
-              className={`p-4 rounded-md border ${color} shadow-sm min-h-[250px] touch-none`}
+              className={`p-4 rounded-md border ${color} shadow-sm min-h-[250px]`}
+              onDragOver={handleDragOver}
               onDrop={() => handleDrop(key)}
             >
               <h2 className="text-lg font-medium mb-3 text-gray-700">{title}</h2>
@@ -115,18 +140,32 @@ const App = () => {
                 {tasks[key].map((task, index) => (
                   <li
                     key={index}
-                    className={`p-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 text-lg ${
+                    className={`p-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
                       task.completed ? 'line-through text-gray-400' : ''
                     }`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, key, index)}
                   >
-                    <span>{task.text}</span>
+                    {editingTask?.quadrant === key && editingTask.index === index ? (
+                      <input
+                        type="text"
+                        value={editedText}
+                        onChange={(e) => setEditedText(e.target.value)}
+                        onBlur={saveEditedTask}
+                        onKeyDown={(e) => e.key === "Enter" && saveEditedTask()}
+                        autoFocus
+                        className="flex-1 p-1 border border-gray-300 rounded"
+                      />
+                    ) : (
+                      <span onDoubleClick={() => startEditing(key, index, task.text)}>
+                        {task.text}
+                      </span>
+                    )}
                     <button
                       className="ml-2 text-xs text-gray-500 hover:text-black"
                       onClick={() => toggleComplete(key, index)}
                     >
-                      ✔️
+                      ✅
                     </button>
                   </li>
                 ))}
@@ -138,10 +177,10 @@ const App = () => {
         <div className="mt-6 text-center">
           <button
             onClick={clearCompletedTasks}
-            className="px-5 py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition duration-200 shadow-md font-semibold tracking-wide text-lg"
+            className="px-4 py-2 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
           >
-            🗑️ Clear Completed Tasks
-          </button>
+             🗑️ Clear Completed Tasks
+            </button>
         </div>
       </div>
     </div>
