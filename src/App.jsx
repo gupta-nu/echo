@@ -11,7 +11,7 @@ const App = () => {
   const [task, setTask] = useState("");
   const [selectedQuadrant, setSelectedQuadrant] = useState("urgentImportant");
   const [tasks, setTasks] = useState({
-    urgentImportant: [],
+    urgentImportant: [], 
     notUrgentImportant: [],
     urgentNotImportant: [],
     notUrgentNotImportant: [],
@@ -93,7 +93,7 @@ const App = () => {
     <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP']">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-medium text-center mb-8 text-gray-800 tracking-wide">
-          Task Organizer
+          Echo! 
         </h1>
 
         <div className="flex items-center gap-3 mb-6 bg-white p-3 rounded-lg shadow-md border border-gray-300">
@@ -127,16 +127,17 @@ const App = () => {
               <h2 className="text-lg font-medium mb-3 text-gray-700">{title}</h2>
               <ul className="space-y-2">
                 {tasks[key].map((task, index) => (
-                  <li
-                    key={index}
-                    className={`p-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
-                      task.completed ? 'line-through text-gray-400' : ''
-                    }`}
-                    draggable
-                    onDragStart={(e) => onDragStart(e, key, index)}
-                    onClick={() => toggleComplete(key, index)}
-                    onDoubleClick={() => startEditing(key, index, task.text)}
-                  >
+                 <li
+                 key={index}
+                 className={`p-2 bg-gray-50 text-black dark:text-black border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
+                   task.completed ? 'line-through text-gray-400' : ''
+                 }`}
+                 draggable
+                 onDragStart={(e) => onDragStart(e, key, index)}
+                 onClick={() => toggleComplete(key, index)}
+                 onDoubleClick={() => startEditing(key, index, task.text)}
+               >
+               
                     {editingTask?.quadrant === key && editingTask.index === index ? (
                       <input
                         type="text"
