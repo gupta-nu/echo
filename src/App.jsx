@@ -16,7 +16,6 @@ const App = () => {
     urgentNotImportant: [],
     notUrgentNotImportant: [],
   });
-  const [draggedItem, setDraggedItem] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [editedText, setEditedText] = useState("");
 
@@ -33,32 +32,6 @@ const App = () => {
     if (e.key === "Enter") {
       addTask();
     }
-  };
-
-  const handleDragStart = (e, quadrant, index) => {
-    setDraggedItem({ quadrant, index, task: tasks[quadrant][index] });
-    e.dataTransfer.setData("text/plain", tasks[quadrant][index].text);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const handleDrop = (targetQuadrant) => {
-    if (!draggedItem) return;
-    const { quadrant: sourceQuadrant, index: sourceIndex, task } = draggedItem;
-    if (sourceQuadrant === targetQuadrant) return;
-
-    setTasks(prev => {
-      const newTasks = { ...prev };
-      newTasks[sourceQuadrant] = newTasks[sourceQuadrant].filter((_, i) => i !== sourceIndex);
-      newTasks[targetQuadrant] = [...newTasks[targetQuadrant], task];
-      return newTasks;
-    });
-
-    setDraggedItem(null);
   };
 
   const toggleComplete = (quadrant, index) => {
@@ -100,6 +73,22 @@ const App = () => {
     setEditedText("");
   };
 
+  const onDragStart = (e, quadrant, index) => {
+    e.dataTransfer.setData("task", JSON.stringify({ quadrant, index }));
+  };
+
+  const onDrop = (e, newQuadrant) => {
+    e.preventDefault();
+    const { quadrant, index } = JSON.parse(e.dataTransfer.getData("task"));
+    setTasks(prev => {
+      const newTasks = { ...prev };
+      const movedTask = newTasks[quadrant][index];
+      newTasks[quadrant] = newTasks[quadrant].filter((_, i) => i !== index);
+      newTasks[newQuadrant] = [...newTasks[newQuadrant], movedTask];
+      return newTasks;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP']">
       <div className="max-w-4xl mx-auto">
@@ -111,7 +100,7 @@ const App = () => {
           <input
             type="text"
             className="flex-1 p-3 border-none outline-none text-gray-800 text-lg"
-            placeholder="Enter a new task..double click on exsiting task to edit it..)"
+            placeholder="Enter a new task..double click on existing task to edit it.."
             value={task}
             onChange={(e) => setTask(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -132,8 +121,8 @@ const App = () => {
             <div
               key={key}
               className={`p-4 rounded-md border ${color} shadow-sm min-h-[250px]`}
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(key)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => onDrop(e, key)}
             >
               <h2 className="text-lg font-medium mb-3 text-gray-700">{title}</h2>
               <ul className="space-y-2">
@@ -144,7 +133,9 @@ const App = () => {
                       task.completed ? 'line-through text-gray-400' : ''
                     }`}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, key, index)}
+                    onDragStart={(e) => onDragStart(e, key, index)}
+                    onClick={() => toggleComplete(key, index)}
+                    onDoubleClick={() => startEditing(key, index, task.text)}
                   >
                     {editingTask?.quadrant === key && editingTask.index === index ? (
                       <input
@@ -157,16 +148,8 @@ const App = () => {
                         className="flex-1 p-1 border border-gray-300 rounded"
                       />
                     ) : (
-                      <span onDoubleClick={() => startEditing(key, index, task.text)}>
-                        {task.text}
-                      </span>
+                      <span>{task.text}</span>
                     )}
-                    <button
-                      className="ml-2 text-xs text-gray-500 hover:text-black"
-                      onClick={() => toggleComplete(key, index)}
-                    >
-                      ✅
-                    </button>
                   </li>
                 ))}
               </ul>
@@ -179,8 +162,8 @@ const App = () => {
             onClick={clearCompletedTasks}
             className="px-4 py-2 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
           >
-             🗑️ Clear Completed Tasks
-            </button>
+            🗑️ Clear Completed Tasks
+          </button>
         </div>
       </div>
     </div>
