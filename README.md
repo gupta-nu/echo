@@ -83,16 +83,10 @@ Once completed, Vercel will provide a **live URL** where your app is hosted.
 ## 🎯 Future Enhancements
 
 - [ ] User Authentication & Multi-User Support 
-- [ ] completed tasks should move at the bottom
 - [ ] Calendar Integration (Google Calendar API)
 - [ ] PWA (Progressive Web App) – Offline Support
 - [ ] **More Customization** – Allow users to set custom categories  
 
-//completed tasks should move to bottom
-//user authentication
-//log in log out
-//fix why its not working on other sys
-//use postgres for storing
-//learn to do it yourself
+
 
 ---
