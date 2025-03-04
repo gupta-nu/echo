@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const categories = {
   urgentImportant: { title: "Important and Urgent", color: "bg-white border-gray-300" },
@@ -40,6 +41,8 @@ const App = () => {
       newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
         i === index ? { ...task, completed: !task.completed } : task
       );
+
+      newTasks[quadrant].sort((a,b)=>a.completed - b.completed);
       return newTasks;
     });
   };
@@ -126,9 +129,10 @@ const App = () => {
             >
               <h2 className="text-lg font-medium mb-3 text-gray-700">{title}</h2>
               <ul className="space-y-2">
+                <AnimatePresence>
                 {tasks[key].map((task, index) => (
-                 <li
-                 key={index}
+                 <motion.li
+                 key={task.text}
                  className={`p-2 bg-gray-50 text-black dark:text-black border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
                    task.completed ? 'line-through text-gray-400' : ''
                  }`}
@@ -136,7 +140,14 @@ const App = () => {
                  onDragStart={(e) => onDragStart(e, key, index)}
                  onClick={() => toggleComplete(key, index)}
                  onDoubleClick={() => startEditing(key, index, task.text)}
+                 layout // Enables smooth movement animation
+                 initial={{ opacity: 0, y: -10 }} // Starts slightly above with opacity 0
+                 animate={{ opacity: 1, y: 0 }} // Moves to normal position
+                 exit={{ opacity: 0, y: 10 }} // Animates out when removed
+                 transition={{ duration: 0.3, ease: "easeInOut" }} // Smooth transition
                >
+               
+              
                
                     {editingTask?.quadrant === key && editingTask.index === index ? (
                       <input
@@ -151,8 +162,9 @@ const App = () => {
                     ) : (
                       <span>{task.text}</span>
                     )}
-                  </li>
+                  </motion.li>
                 ))}
+                </AnimatePresence>
               </ul>
             </div>
           ))}
