@@ -1,11 +1,66 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const categories = {
   urgentImportant: { title: "Important and Urgent", color: "bg-white border-gray-300" },
   notUrgentImportant: { title: "Important but Not Urgent", color: "bg-white border-gray-300" },
   urgentNotImportant: { title: "Urgent but Not Important", color: "bg-white border-gray-300" },
   notUrgentNotImportant: { title: "Neither Important nor Urgent", color: "bg-white border-gray-300" },
+};
+
+const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditing, updateTask }) => {
+  const [{ isDragging }, drag] = useDrag({
+    type: "TASK",
+    item: { index, quadrant },
+    collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
+  });
+
+  return (
+    <motion.li
+      ref={drag}
+      className={`p-1 text-xs bg-gray-50 text-black border border-gray-300 rounded-lg shadow-sm flex items-center transition-all duration-200 cursor-pointer ${
+        task.completed ? "line-through text-gray-400" : ""
+      } ${isDragging ? "opacity-50" : ""}`}
+      onClick={() => toggleComplete(quadrant, index)}
+      onDoubleClick={() => startEditing(quadrant, index, task.text)}
+    >
+      <span className="mr-2 text-sm">→</span>
+      {task.editing ? (
+        <input
+          type="text"
+          className="text-xs border border-gray-300 rounded-md px-1"
+          value={task.text}
+          onChange={(e) => updateTask(quadrant, index, e.target.value)}
+          onBlur={() => startEditing(quadrant, index, null)}
+          autoFocus
+        />
+      ) : (
+        task.text
+      )}
+    </motion.li>
+  );
+};
+
+const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplete, startEditing, updateTask }) => {
+  const [, drop] = useDrop({
+    accept: "TASK",
+    drop: (item) => moveTask(item.quadrant, item.index, quadrant),
+  });
+
+  return (
+    <div ref={drop} className={`p-6 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}> 
+      <h2 className="text-md font-semibold mb-4 text-gray-700">{title}</h2>
+      <ul className="space-y-2 flex-1">
+        <AnimatePresence>
+          {tasks.map((task, index) => (
+            <TaskItem key={index} task={task} index={index} quadrant={quadrant} moveTask={moveTask} toggleComplete={toggleComplete} startEditing={startEditing} updateTask={updateTask} />
+          ))}
+        </AnimatePresence>
+      </ul>
+    </div>
+  );
 };
 
 const App = () => {
@@ -17,14 +72,12 @@ const App = () => {
     urgentNotImportant: [],
     notUrgentNotImportant: [],
   });
-  const [editingTask, setEditingTask] = useState(null);
-  const [editedText, setEditedText] = useState("");
 
   const addTask = () => {
     if (task.trim() === "") return;
-    setTasks(prev => ({
+    setTasks((prev) => ({
       ...prev,
-      [selectedQuadrant]: [...prev[selectedQuadrant], { text: task, completed: false }]
+      [selectedQuadrant]: [...prev[selectedQuadrant], { text: task, completed: false, editing: false }],
     }));
     setTask("");
   };
@@ -36,150 +89,89 @@ const App = () => {
   };
 
   const toggleComplete = (quadrant, index) => {
-    setTasks(prev => {
+    setTasks((prev) => {
       const newTasks = { ...prev };
       newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
         i === index ? { ...task, completed: !task.completed } : task
       );
-
-      newTasks[quadrant].sort((a,b)=>a.completed - b.completed);
-      return newTasks;
-    });
-  };
-
-  const clearCompletedTasks = () => {
-    setTasks(prev => {
-      const newTasks = {};
-      Object.keys(prev).forEach(key => {
-        newTasks[key] = prev[key].filter(task => !task.completed);
-      });
       return newTasks;
     });
   };
 
   const startEditing = (quadrant, index, text) => {
-    setEditingTask({ quadrant, index });
-    setEditedText(text);
-  };
-
-  const saveEditedTask = () => {
-    if (!editingTask) return;
-    const { quadrant, index } = editingTask;
-    setTasks(prev => {
+    setTasks((prev) => {
       const newTasks = { ...prev };
       newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
-        i === index ? { ...task, text: editedText } : task
+        i === index ? { ...task, editing: text !== null, text: text ?? task.text } : task
       );
       return newTasks;
     });
-    setEditingTask(null);
-    setEditedText("");
   };
 
-  const onDragStart = (e, quadrant, index) => {
-    e.dataTransfer.setData("task", JSON.stringify({ quadrant, index }));
-  };
-
-  const onDrop = (e, newQuadrant) => {
-    e.preventDefault();
-    const { quadrant, index } = JSON.parse(e.dataTransfer.getData("task"));
-    setTasks(prev => {
+  const updateTask = (quadrant, index, newText) => {
+    setTasks((prev) => {
       const newTasks = { ...prev };
-      const movedTask = newTasks[quadrant][index];
-      newTasks[quadrant] = newTasks[quadrant].filter((_, i) => i !== index);
-      newTasks[newQuadrant] = [...newTasks[newQuadrant], movedTask];
+      newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
+        i === index ? { ...task, text: newText } : task
+      );
+      return newTasks;
+    });
+  };
+
+  const clearCompletedTasks = () => {
+    setTasks((prev) => {
+      const newTasks = {};
+      Object.keys(prev).forEach((key) => {
+        newTasks[key] = prev[key].filter((task) => !task.completed);
+      });
+      return newTasks;
+    });
+  };
+
+  const moveTask = (fromQuadrant, index, toQuadrant) => {
+    setTasks((prev) => {
+      const newTasks = { ...prev };
+      const [movedTask] = newTasks[fromQuadrant].splice(index, 1);
+      newTasks[toQuadrant] = [...newTasks[toQuadrant], movedTask];
       return newTasks;
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP']">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-medium text-center mb-8 text-gray-800 tracking-wide">
-          Echo! 
-        </h1>
-
-        <div className="flex items-center gap-3 mb-6 bg-white p-3 rounded-lg shadow-md border border-gray-300">
-          <input
-            type="text"
-            className="flex-1 p-3 border-none outline-none text-gray-800 text-lg"
-            placeholder="Enter a new task..double click on existing task to edit it.."
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <select
-            className="p-2 border border-gray-300 rounded-md bg-white text-gray-700"
-            value={selectedQuadrant}
-            onChange={(e) => setSelectedQuadrant(e.target.value)}
-          >
-            {Object.entries(categories).map(([key, { title }]) => (
-              <option key={key} value={key}>{title}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.entries(categories).map(([key, { title, color }]) => (
-            <div
-              key={key}
-              className={`p-4 rounded-md border ${color} shadow-sm min-h-[250px]`}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => onDrop(e, key)}
-            >
-              <h2 className="text-lg font-medium mb-3 text-gray-700">{title}</h2>
-              <ul className="space-y-2">
-                <AnimatePresence>
-                {tasks[key].map((task, index) => (
-                 <motion.li
-                 key={task.text}
-                 className={`p-2 bg-gray-50 text-black dark:text-black border border-gray-300 rounded-md shadow-sm cursor-pointer flex items-center justify-between transition-all duration-200 ${
-                   task.completed ? 'line-through text-gray-400' : ''
-                 }`}
-                 draggable
-                 onDragStart={(e) => onDragStart(e, key, index)}
-                 onClick={() => toggleComplete(key, index)}
-                 onDoubleClick={() => startEditing(key, index, task.text)}
-                 layout // Enables smooth movement animation
-                 initial={{ opacity: 0, y: -10 }} // Starts slightly above with opacity 0
-                 animate={{ opacity: 1, y: 0 }} // Moves to normal position
-                 exit={{ opacity: 0, y: 10 }} // Animates out when removed
-                 transition={{ duration: 0.3, ease: "easeInOut" }} // Smooth transition
-               >
-               
-              
-               
-                    {editingTask?.quadrant === key && editingTask.index === index ? (
-                      <input
-                        type="text"
-                        value={editedText}
-                        onChange={(e) => setEditedText(e.target.value)}
-                        onBlur={saveEditedTask}
-                        onKeyDown={(e) => e.key === "Enter" && saveEditedTask()}
-                        autoFocus
-                        className="flex-1 p-1 border border-gray-300 rounded"
-                      />
-                    ) : (
-                      <span>{task.text}</span>
-                    )}
-                  </motion.li>
+    <DndProvider backend={HTML5Backend}>
+      <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP'] flex flex-col items-center">
+        <div className="w-full max-w-6xl">
+          <div className="flex items-center gap-4 mb-6">
+            <h1 className="text-3xl font-bold text-gray-800">Echo!</h1>
+            <div className="flex items-center flex-1 bg-white p-1 rounded-lg shadow-md border border-gray-300 w-[250px]">
+              <input
+                type="text"
+                className="w-20 p-1 border-none outline-none text-gray-800 text-xs"
+                placeholder="Enter task..."
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <select
+                className="p-1 border border-gray-300 rounded-md bg-white text-gray-700 text-xs"
+                value={selectedQuadrant}
+                onChange={(e) => setSelectedQuadrant(e.target.value)}
+              >
+                {Object.entries(categories).map(([key, { title }]) => (
+                  <option key={key} value={key}>{title}</option>
                 ))}
-                </AnimatePresence>
-              </ul>
+              </select>
             </div>
-          ))}
-        </div>
-        
-        <div className="mt-6 text-center">
-          <button
-            onClick={clearCompletedTasks}
-            className="px-4 py-2 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
-          >
-            🗑️ Clear Completed Tasks
-          </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            {Object.entries(categories).map(([key, { title, color }]) => (
+              <CategoryColumn key={key} quadrant={key} title={title} color={color} tasks={tasks[key]} moveTask={moveTask} toggleComplete={toggleComplete} startEditing={startEditing} updateTask={updateTask} />
+            ))}
+          </div>
+          <button onClick={clearCompletedTasks} className="mt-6 text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide">Clear Completed Tasks</button>
         </div>
       </div>
-    </div>
+    </DndProvider>
   );
 };
 
