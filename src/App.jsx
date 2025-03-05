@@ -190,7 +190,7 @@ const App = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP'] flex flex-col items-center">
-        <div className="mt-0 mb-3 text-xs text-grey-700 font-mono tracking-wide font-['Noto Sans JP']">
+        <div className="mt-0 mb-3 text-xs text-black font-mono tracking-wide font-['Noto Sans JP']">
           {dateTime.toLocaleString()} {/* Formats date & time nicely */}
         </div>
         <div className="w-full max-w-6xl">
