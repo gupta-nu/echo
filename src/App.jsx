@@ -41,12 +41,8 @@ const App = () => {
       newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
         i === index ? { ...task, completed: !task.completed } : task
       );
-<<<<<<< Updated upstream
 
       newTasks[quadrant].sort((a,b)=>a.completed - b.completed);
-=======
-      newTasks[quadrant].sort((a, b) => a.completed - b.completed);
->>>>>>> Stashed changes
       return newTasks;
     });
   };
