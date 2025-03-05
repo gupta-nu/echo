@@ -147,7 +147,7 @@ const App = () => {
               <input
                 type="text"
                 className="w-20 p-1 border-none outline-none text-gray-800 text-xs"
-                placeholder="Enter task..."
+                placeholder="Enter a new task,click on an existing task to mark it completed,and double click to edit,drag and drop tasks from each category as needed"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
                 onKeyDown={handleKeyDown}
