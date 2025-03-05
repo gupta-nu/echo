@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -11,6 +11,8 @@ const categories = {
 };
 
 const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditing, updateTask }) => {
+  if (!task) return null; // Early return if task is undefined
+
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: { index, quadrant },
@@ -33,6 +35,11 @@ const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditin
           className="text-xs border border-gray-300 rounded-md px-1"
           value={task.text}
           onChange={(e) => updateTask(quadrant, index, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              startEditing(quadrant, index, null); // Save and exit edit mode
+            }
+          }}
           onBlur={() => startEditing(quadrant, index, null)}
           autoFocus
         />
@@ -46,16 +53,30 @@ const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditin
 const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplete, startEditing, updateTask }) => {
   const [, drop] = useDrop({
     accept: "TASK",
-    drop: (item) => moveTask(item.quadrant, item.index, quadrant),
+    drop: (item) => {
+      // Only move if the dragged task is not in the same quadrant
+      if (item.quadrant !== quadrant) {
+        moveTask(item.quadrant, item.index, quadrant); // Move the task to the new quadrant
+      }
+    },
   });
 
   return (
-    <div ref={drop} className={`p-6 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}> 
-      <h2 className="text-md font-semibold mb-4 text-gray-700">{title}</h2>
+    <div ref={drop} className={`p-2 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}>
+      <h2 className="text-md font-semibold mb-1 text-gray-700">{title}</h2>
       <ul className="space-y-2 flex-1">
         <AnimatePresence>
           {tasks.map((task, index) => (
-            <TaskItem key={index} task={task} index={index} quadrant={quadrant} moveTask={moveTask} toggleComplete={toggleComplete} startEditing={startEditing} updateTask={updateTask} />
+            <TaskItem
+              key={task.id} // Fix key to be task.id
+              task={task}
+              index={index}
+              quadrant={quadrant}
+              moveTask={moveTask}
+              toggleComplete={toggleComplete}
+              startEditing={startEditing}
+              updateTask={updateTask}
+            />
           ))}
         </AnimatePresence>
       </ul>
@@ -64,28 +85,35 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
 };
 
 const App = () => {
+  const [dateTime, setDateTime] = useState(new Date());
   const [task, setTask] = useState("");
   const [selectedQuadrant, setSelectedQuadrant] = useState("urgentImportant");
   const [tasks, setTasks] = useState({
-    urgentImportant: [], 
+    urgentImportant: [],
     notUrgentImportant: [],
     urgentNotImportant: [],
     notUrgentNotImportant: [],
   });
 
-  const addTask = () => {
-    if (task.trim() === "") return;
-    setTasks((prev) => ({
-      ...prev,
-      [selectedQuadrant]: [...prev[selectedQuadrant], { text: task, completed: false, editing: false }],
-    }));
-    setTask("");
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       addTask();
     }
+  };
+
+  const addTask = () => {
+    if (task.trim() === "") return;
+    const newTask = {
+      id: Date.now(), // Use timestamp as a unique ID
+      text: task,
+      completed: false,
+      editing: false,
+    };
+    setTasks((prev) => ({
+      ...prev,
+      [selectedQuadrant]: [...prev[selectedQuadrant], newTask],
+    }));
+    setTask("");
   };
 
   const toggleComplete = (quadrant, index) => {
@@ -129,28 +157,52 @@ const App = () => {
   };
 
   const moveTask = (fromQuadrant, index, toQuadrant) => {
+    console.log("Moving task", fromQuadrant, index, "to", toQuadrant);
+
     setTasks((prev) => {
       const newTasks = { ...prev };
-      const [movedTask] = newTasks[fromQuadrant].splice(index, 1);
+
+      const movedTask = newTasks[fromQuadrant][index];
+      if (!movedTask) {
+        console.error("Task to move is not found!");
+        return prev; // Do not update if task is not found
+      }
+
+      // Remove task from the source quadrant
+      newTasks[fromQuadrant] = newTasks[fromQuadrant].filter((_, i) => i !== index);
+
+      // Add task to the destination quadrant
       newTasks[toQuadrant] = [...newTasks[toQuadrant], movedTask];
+
       return newTasks;
     });
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDateTime(new Date()); // Update the state every second
+    }, 1000);
+
+    return () => clearInterval(interval); // Cleanup the interval
+  }, []);
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP'] flex flex-col items-center">
+        <div className="mt-0 mb-3 text-xs text-grey-700 font-mono tracking-wide font-['Noto Sans JP']">
+          {dateTime.toLocaleString()} {/* Formats date & time nicely */}
+        </div>
         <div className="w-full max-w-6xl">
           <div className="flex items-center gap-4 mb-6">
             <h1 className="text-3xl font-bold text-gray-800">Echo!</h1>
-            <div className="flex items-center flex-1 bg-white p-1 rounded-lg shadow-md border border-gray-300 w-[250px]">
+            <div className="flex items-center justify-between flex-1 bg-white p-1 rounded-lg shadow-md border border-gray-300 w-[250px]">
               <input
                 type="text"
-                className="w-20 p-1 border-none outline-none text-gray-800 text-xs"
-                placeholder="Enter a new task,click on an existing task to mark it completed,and double click to edit,drag and drop tasks from each category as needed"
+                className="w-full p-1 border-none outline-none text-gray-800 text-xs"
+                placeholder="Enter a new task, click on an existing task to mark it completed, and double-click to edit, drag and drop tasks from each category as needed"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleKeyDown} // Added handleKeyDown
               />
               <select
                 className="p-1 border border-gray-300 rounded-md bg-white text-gray-700 text-xs"
@@ -165,10 +217,25 @@ const App = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {Object.entries(categories).map(([key, { title, color }]) => (
-              <CategoryColumn key={key} quadrant={key} title={title} color={color} tasks={tasks[key]} moveTask={moveTask} toggleComplete={toggleComplete} startEditing={startEditing} updateTask={updateTask} />
+              <CategoryColumn
+                key={key}
+                quadrant={key}
+                title={title}
+                color={color}
+                tasks={tasks[key]}
+                moveTask={moveTask}
+                toggleComplete={toggleComplete}
+                startEditing={startEditing}
+                updateTask={updateTask}
+              />
             ))}
           </div>
-          <button onClick={clearCompletedTasks} className="mt-6 text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide">Clear Completed Tasks</button>
+          <button
+            onClick={clearCompletedTasks}
+            className="mt-6 text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
+          >
+            Clear Completed Tasks
+          </button>
         </div>
       </div>
     </DndProvider>
