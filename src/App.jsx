@@ -11,13 +11,13 @@ const categories = {
 };
 
 const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditing, updateTask }) => {
-  if (!task) return null; // Early return if task is undefined
-
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: { index, quadrant },
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   });
+
+  if (!task) return null;
 
   return (
     <motion.li
@@ -35,11 +35,7 @@ const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditin
           className="text-xs border border-gray-300 rounded-md px-1"
           value={task.text}
           onChange={(e) => updateTask(quadrant, index, e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              startEditing(quadrant, index, null); // Save and exit edit mode
-            }
-          }}
+          onKeyDown={(e) => e.key === "Enter" && startEditing(quadrant, index, null)}
           onBlur={() => startEditing(quadrant, index, null)}
           autoFocus
         />
@@ -54,9 +50,8 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
   const [, drop] = useDrop({
     accept: "TASK",
     drop: (item) => {
-      // Only move if the dragged task is not in the same quadrant
       if (item.quadrant !== quadrant) {
-        moveTask(item.quadrant, item.index, quadrant); // Move the task to the new quadrant
+        moveTask(item.quadrant, item.index, quadrant);
       }
     },
   });
@@ -68,7 +63,7 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
         <AnimatePresence>
           {tasks.map((task, index) => (
             <TaskItem
-              key={task.id} // Fix key to be task.id
+              key={task.id}
               task={task}
               index={index}
               quadrant={quadrant}
@@ -95,16 +90,21 @@ const App = () => {
     notUrgentNotImportant: [],
   });
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      addTask();
-    }
-  };
+  // Load tasks from localStorage
+  useEffect(() => {
+    const savedTasks = localStorage.getItem("tasks");
+    if (savedTasks) setTasks(JSON.parse(savedTasks));
+  }, []);
+
+  // Save tasks to localStorage
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
 
   const addTask = () => {
     if (task.trim() === "") return;
     const newTask = {
-      id: Date.now(), // Use timestamp as a unique ID
+      id: Date.now(),
       text: task,
       completed: false,
       editing: false,
@@ -116,13 +116,17 @@ const App = () => {
     setTask("");
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") addTask();
+  };
+
   const toggleComplete = (quadrant, index) => {
     setTasks((prev) => {
       const newTasks = { ...prev };
       newTasks[quadrant] = newTasks[quadrant].map((task, i) =>
         i === index ? { ...task, completed: !task.completed } : task
       );
-      newTasks[quadrant].sort((a,b)=>a.completed - b.completed);
+      newTasks[quadrant].sort((a, b) => a.completed - b.completed);
       return newTasks;
     });
   };
@@ -158,40 +162,29 @@ const App = () => {
   };
 
   const moveTask = (fromQuadrant, index, toQuadrant) => {
-    console.log("Moving task", fromQuadrant, index, "to", toQuadrant);
-
     setTasks((prev) => {
       const newTasks = { ...prev };
-
       const movedTask = newTasks[fromQuadrant][index];
-      if (!movedTask) {
-        console.error("Task to move is not found!");
-        return prev; // Do not update if task is not found
-      }
-
-      // Remove task from the source quadrant
+      
+      if (!movedTask) return prev;
+      
       newTasks[fromQuadrant] = newTasks[fromQuadrant].filter((_, i) => i !== index);
-
-      // Add task to the destination quadrant
       newTasks[toQuadrant] = [...newTasks[toQuadrant], movedTask];
-
+      
       return newTasks;
     });
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDateTime(new Date()); // Update the state every second
-    }, 1000);
-
-    return () => clearInterval(interval); // Cleanup the interval
+    const interval = setInterval(() => setDateTime(new Date()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP'] flex flex-col items-center">
         <div className="mt-0 mb-3 text-xs text-black font-mono tracking-wide font-['Noto Sans JP']">
-          {dateTime.toLocaleString()} {/* Formats date & time nicely */}
+          {dateTime.toLocaleString()}
         </div>
         <div className="w-full max-w-6xl">
           <div className="flex items-center gap-4 mb-6">
@@ -200,10 +193,10 @@ const App = () => {
               <input
                 type="text"
                 className="w-full p-1 border-none outline-none text-gray-800 text-xs"
-                placeholder="Enter a new task, click on an existing task to mark it completed, and double-click to edit, drag and drop tasks from each category as needed"
+                placeholder="Enter a new task..."
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
-                onKeyDown={handleKeyDown} // Added handleKeyDown
+                onKeyDown={handleKeyDown}
               />
               <select
                 className="p-1 border border-gray-300 rounded-md bg-white text-gray-700 text-xs"
