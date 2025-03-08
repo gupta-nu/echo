@@ -85,7 +85,6 @@ Once completed, Vercel will provide a **live URL** where your app is hosted.
 
 - [ ] User Authentication & Multi-User Support 
 - [ ] Calendar Integration (Google Calendar API)
-- [ ] PWA (Progressive Web App) – Offline Support
 - [ ] **More Customization** – Allow users to set custom categories  
 - [ ] implement a notpad for quick notetaking 
 
