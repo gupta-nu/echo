@@ -209,18 +209,25 @@ const App = () => {
 
   const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
     setTasks((prev) => {
+      // Prevent invalid moves
+      if (
+        fromIndex < 0 ||
+        fromIndex >= prev[fromQuadrant].length ||
+        toIndex < 0 ||
+        toIndex > prev[toQuadrant].length
+      ) {
+        return prev;
+      }
+  
       const newTasks = { ...prev };
       const movedTask = newTasks[fromQuadrant][fromIndex];
-      
-      // If moving within same quadrant
+  
       if (fromQuadrant === toQuadrant) {
         const tasksCopy = [...newTasks[fromQuadrant]];
         const [removed] = tasksCopy.splice(fromIndex, 1);
         tasksCopy.splice(toIndex, 0, removed);
         newTasks[fromQuadrant] = tasksCopy;
-      } 
-      // If moving between quadrants
-      else {
+      } else {
         const sourceTasks = [...newTasks[fromQuadrant]];
         const targetTasks = [...newTasks[toQuadrant]];
         const [removed] = sourceTasks.splice(fromIndex, 1);
