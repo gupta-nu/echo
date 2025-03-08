@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -11,17 +11,63 @@ const categories = {
 };
 
 const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditing, updateTask }) => {
+  const ref = useRef(null);
+
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: { index, quadrant },
-    collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
   });
+
+  const [, drop] = useDrop({
+    accept: "TASK",
+    hover(item, monitor) {
+      if (!ref.current) return;
+      
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      const dragQuadrant = item.quadrant;
+      const hoverQuadrant = quadrant;
+
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex && dragQuadrant === hoverQuadrant) return;
+
+      // Determine rectangle on screen
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      
+      // Get vertical middle
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      
+      // Get mouse position
+      const clientOffset = monitor.getClientOffset();
+      
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+      // Only perform the move when the mouse has crossed half of the items height
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+
+      // Time to actually perform the action
+      moveTask(dragQuadrant, dragIndex, hoverQuadrant, hoverIndex);
+
+      // Note: we're mutating the monitor item here!
+      // Generally it's better to avoid mutations,
+      // but it's good here for the sake of performance
+      // to avoid expensive index searches.
+      item.index = hoverIndex;
+    },
+  });
+
+  drag(drop(ref));
 
   if (!task) return null;
 
   return (
     <motion.li
-      ref={drag}
+      ref={ref}
       className={`p-1 text-xs bg-gray-50 text-black border border-gray-300 rounded-lg shadow-sm flex items-center transition-all duration-200 cursor-pointer ${
         task.completed ? "line-through text-gray-400" : ""
       } ${isDragging ? "opacity-50" : ""}`}
@@ -49,9 +95,9 @@ const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditin
 const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplete, startEditing, updateTask }) => {
   const [, drop] = useDrop({
     accept: "TASK",
-    drop: (item) => {
+    drop(item) {
       if (item.quadrant !== quadrant) {
-        moveTask(item.quadrant, item.index, quadrant);
+        moveTask(item.quadrant, item.index, quadrant, tasks.length);
       }
     },
   });
@@ -161,20 +207,31 @@ const App = () => {
     });
   };
 
-  const moveTask = (fromQuadrant, index, toQuadrant) => {
+  const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
     setTasks((prev) => {
       const newTasks = { ...prev };
-      const movedTask = newTasks[fromQuadrant][index];
+      const movedTask = newTasks[fromQuadrant][fromIndex];
       
-      if (!movedTask) return prev;
-      
-      newTasks[fromQuadrant] = newTasks[fromQuadrant].filter((_, i) => i !== index);
-      newTasks[toQuadrant] = [...newTasks[toQuadrant], movedTask];
-      
+      // If moving within same quadrant
+      if (fromQuadrant === toQuadrant) {
+        const tasksCopy = [...newTasks[fromQuadrant]];
+        const [removed] = tasksCopy.splice(fromIndex, 1);
+        tasksCopy.splice(toIndex, 0, removed);
+        newTasks[fromQuadrant] = tasksCopy;
+      } 
+      // If moving between quadrants
+      else {
+        const sourceTasks = [...newTasks[fromQuadrant]];
+        const targetTasks = [...newTasks[toQuadrant]];
+        const [removed] = sourceTasks.splice(fromIndex, 1);
+        targetTasks.splice(toIndex, 0, removed);
+        newTasks[fromQuadrant] = sourceTasks;
+        newTasks[toQuadrant] = targetTasks;
+      }
+  
       return newTasks;
     });
   };
-
   useEffect(() => {
     const interval = setInterval(() => setDateTime(new Date()), 1000);
     return () => clearInterval(interval);
