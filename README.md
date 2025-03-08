@@ -11,7 +11,8 @@ A **simple and efficient task manager** built with **React** and **Tailwind CSS*
 ✅ **Quick Task Input** – Press **Enter** to add tasks seamlessly  
 ✅ **Four Task Categories** – Organizes tasks using the **Eisenhower Matrix**  
 ✅ **Drag & Drop Functionality** – Move tasks between quadrants effortlessly  
-✅ **Task Completion Toggle** – Mark tasks as completed with a simple click  
+✅ **Task Completion single click** – Mark tasks as completed with a simple click
+✅ **exisitng task editing** – edit exisitng tasks by double clicking on that task 
 ✅ **Clear Completed Tasks** – Remove all completed tasks instantly  
 ✅ **Modern UI** – Clean and responsive design for a smooth experience  
 
