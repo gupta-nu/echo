@@ -84,9 +84,10 @@ Once completed, Vercel will provide a **live URL** where your app is hosted.
 ## 🎯 Future Enhancements
 
 - [ ] User Authentication & Multi-User Support 
-- [ ] Calendar Integration (Google Calendar API)
-- [ ] **More Customization** – Allow users to set custom categories  
+- [ ] **real time collaboration**  
 - [ ] implement a notpad for quick notetaking 
-
-
+- [ ] **disturbuted task processing** (event souring with kafka,cqrs,redis caching)
+- [ ] //later// offline first architecture
+- [ ] be able to create sub tasks in a task(nested tasks)
+ 
 ---
