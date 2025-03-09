@@ -270,7 +270,7 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
               <input
                 type="text"
                 className="w-full p-1 border-none outline-none text-gray-800 text-xs"
-                placeholder="Enter a new task..."
+                placeholder="Enter a new task, click on a existing task to mark it completed or double click to edit it"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -326,7 +326,7 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
           exit={{ rotateX: -90, opacity: 1 }}
           transition={{ duration: 0.4 }}
           style={{ transformPerspective: 1000 }}
-            className="fixed bottom-4 right-4 w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10 "
+            className="fixed  w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10 "
           >
             <div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center">
               <span className="text-xs font-semibold text-gray-700">Quick Notes</span>
