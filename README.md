@@ -1,46 +1,49 @@
-# 📝 Task Organizer – Eisenhower Matrix
-A **simple and efficient task manager** built with **React** and **Tailwind CSS**, designed for users with **ADHD and dyslexia**. It uses the **Eisenhower Matrix** to prioritize tasks by urgency and importance, making organization straightforward. Features include **quick task entry, drag-and-drop organization, and a clean, distraction-free interface** for better focus and productivity.
+# Task Organizer – Eisenhower Matrix
 
-## 📌 Live Demo  
-🚀 [Check out the live version on Vercel](https://focuspocus.vercel.app/)  
+A simple and efficient task manager built with React and Tailwind CSS, designed for users with ADHD and dyslexia. It uses the Eisenhower Matrix to prioritize tasks by urgency and importance, making organization straightforward. Features include quick task entry, drag-and-drop organization, and a clean, distraction-free interface for better focus and productivity.
 
----
-
-## 🚀 Features
-
-✅ **Quick Task Input** – Press **Enter** to add tasks seamlessly  
-✅ **Four Task Categories** – Organizes tasks using the **Eisenhower Matrix**  
-✅ **Drag & Drop Functionality** – Move tasks between quadrants effortlessly  
-✅ **Task Completion single click** – Mark tasks as completed with a simple click
-✅ **exisitng task editing** – edit exisitng tasks by double clicking on that task 
-✅ **Clear Completed Tasks** – Remove all completed tasks instantly  
-✅ **Modern UI** – Clean and responsive design for a smooth experience  
+## Live Demo  
+[Check out the live version on Vercel](https://focuspocus.vercel.app/)  
 
 ---
 
-## 🖥️ Tech Stack
+## Features
+
+- **Quick Task Input** – Press Enter to add tasks seamlessly  
+- **Four Task Categories** – Organizes tasks using the Eisenhower Matrix  
+- **Drag & Drop Functionality** – Move tasks between quadrants effortlessly  
+- **Task Completion** – Mark tasks as completed with a single click  
+- **Task Editing** – Edit existing tasks by double-clicking on them  
+- **Clear Completed Tasks** – Remove all completed tasks instantly  
+- **Modern UI** – Clean and responsive design for a smooth experience  
+- **Notepad Integration** – A quick-access notepad for jotting down thoughts  
+
+---
+
+## Tech Stack
 
 - **Frontend:** React, Tailwind CSS  
-- **State Management:** React Hooks (`useState`)  
-- **Drag & Drop:** Native HTML5 Drag & Drop API  
+- **State Management:** React Hooks (useState, useEffect)  
+- **Drag & Drop:** React DnD (react-dnd) with HTML5 Backend  
+- **Animation:** Framer Motion  
 - **Deployment:** Vercel  
 
 ---
 
-## 📦 Installation & Setup
+## Installation & Setup
 
-### **1️⃣ Clone the repository**
+### 1. Clone the repository
 ```sh
 git clone https://github.com/gupta-nu/echo.git
 cd echo
 ```
 
-### **2️⃣ Install dependencies**
+### 2. Install dependencies
 ```sh
 npm install
 ```
 
-### **3️⃣ Start the development server**
+### 3. Start the development server
 ```sh
 npm run dev
 ```
@@ -48,23 +51,23 @@ Your application should now be running at `http://localhost:5173`.
 
 ---
 
-## 🌍 Deployment on Vercel
+## Deployment on Vercel
 
-### **1️⃣ Automatic Deployment (Recommended)**
+### 1. Automatic Deployment (Recommended)
 1. Push your code to a GitHub repository.
-2. Link your repository with **Vercel**.
-3. Every push to the **main branch** will automatically deploy the latest version.
+2. Link your repository with Vercel.
+3. Every push to the main branch will automatically deploy the latest version.
 
-### **2️⃣ Manual Deployment**
+### 2. Manual Deployment
 If you've already set up Vercel, you can deploy manually by running:
 ```sh
 vercel --prod
 ```
-Once completed, Vercel will provide a **live URL** where your app is hosted.
+Once completed, Vercel will provide a live URL where your app is hosted.
 
 ---
 
-## 🏗️ Folder Structure
+## Folder Structure
 
 ```
 /echo
@@ -81,13 +84,14 @@ Once completed, Vercel will provide a **live URL** where your app is hosted.
 
 ---
 
-## 🎯 Future Enhancements
+## Future Enhancements
 
-- [ ] User Authentication & Multi-User Support 
-- [ ] **real time collaboration**  
-- [ ] implement a notpad for quick notetaking 
-- [ ] **disturbuted task processing** (event souring with kafka,cqrs,redis caching)
-- [ ] //later// offline first architecture
-- [ ] be able to create sub tasks in a task(nested tasks)
- 
+- User Authentication & Multi-User Support  
+- Real-Time Collaboration  
+- Distributed Task Processing (Event Sourcing with Kafka, CQRS, Redis Caching)  
+- Offline-First Architecture  
+- Nested Subtasks (Ability to create sub-tasks within a task)  
+- Enhanced Notepad Features (Rich text formatting, tagging, and search)  
+
 ---
+

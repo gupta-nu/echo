@@ -334,7 +334,7 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
                 onClick={() => setShowNotepad(false)}
                 className="text-gray-500 hover:text-gray-700 text-xs"
               >
-                ×
+                ❌
               </button>
             </div>
             <textarea
