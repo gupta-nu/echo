@@ -4,10 +4,10 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 const categories = {
-  urgentImportant: { title: "Important and Urgent", color: "bg-white border-gray-300" },
-  notUrgentImportant: { title: "Important but Not Urgent", color: "bg-white border-gray-300" },
-  urgentNotImportant: { title: "Urgent but Not Important", color: "bg-white border-gray-300" },
-  notUrgentNotImportant: { title: "Neither Important nor Urgent", color: "bg-white border-gray-300" },
+  urgentImportant: { title: "Critical and Immediate", color: "bg-white border-gray-300" },
+  notUrgentImportant: { title: "Important but not urgent", color: "bg-white border-gray-300" },
+  urgentNotImportant: { title: "Critial and Shallow tasks", color: "bg-white border-gray-300" },
+  notUrgentNotImportant: { title: "low Priority Tasks", color: "bg-white border-gray-300" },
 };
 
 const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditing, updateTask }) => {
@@ -125,7 +125,11 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
   );
 };
 
+
 const App = () => {
+  const [showNotepad, setShowNotepad] = useState(false);
+  const [notes, setNotes] = useState("");
+  
   const [dateTime, setDateTime] = useState(new Date());
   const [task, setTask] = useState("");
   const [selectedQuadrant, setSelectedQuadrant] = useState("urgentImportant");
@@ -146,6 +150,15 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
+  // load takss from localstorage
+  useEffect(() => {
+    const savedNotes = localStorage.getItem("notes");
+    if (savedNotes) setNotes(savedNotes);
+  }, []);
+  //save tasks from localstorage
+  useEffect(() => {
+    localStorage.setItem("notes", notes);
+  }, [notes]);
 
   const addTask = () => {
     if (task.trim() === "") return;
@@ -207,38 +220,38 @@ const App = () => {
     });
   };
 
-  const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
-    setTasks((prev) => {
-      // Prevent invalid moves
-      if (
-        fromIndex < 0 ||
-        fromIndex >= prev[fromQuadrant].length ||
-        toIndex < 0 ||
-        toIndex > prev[toQuadrant].length
-      ) {
-        return prev;
-      }
-  
-      const newTasks = { ...prev };
-      const movedTask = newTasks[fromQuadrant][fromIndex];
-  
-      if (fromQuadrant === toQuadrant) {
-        const tasksCopy = [...newTasks[fromQuadrant]];
-        const [removed] = tasksCopy.splice(fromIndex, 1);
-        tasksCopy.splice(toIndex, 0, removed);
-        newTasks[fromQuadrant] = tasksCopy;
-      } else {
-        const sourceTasks = [...newTasks[fromQuadrant]];
-        const targetTasks = [...newTasks[toQuadrant]];
-        const [removed] = sourceTasks.splice(fromIndex, 1);
-        targetTasks.splice(toIndex, 0, removed);
-        newTasks[fromQuadrant] = sourceTasks;
-        newTasks[toQuadrant] = targetTasks;
-      }
-  
-      return newTasks;
-    });
-  };
+const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
+  setTasks((prev) => {
+    // Prevent invalid moves
+    if (
+      fromIndex < 0 ||
+      fromIndex >= prev[fromQuadrant].length ||
+      toIndex < 0 ||
+      toIndex > prev[toQuadrant].length
+    ) {
+      return prev;
+    }
+
+    const newTasks = { ...prev };
+    const movedTask = newTasks[fromQuadrant][fromIndex];
+
+    if (fromQuadrant === toQuadrant) {
+      const tasksCopy = [...newTasks[fromQuadrant]];
+      const [removed] = tasksCopy.splice(fromIndex, 1);
+      tasksCopy.splice(toIndex, 0, removed);
+      newTasks[fromQuadrant] = tasksCopy;
+    } else {
+      const sourceTasks = [...newTasks[fromQuadrant]];
+      const targetTasks = [...newTasks[toQuadrant]];
+      const [removed] = sourceTasks.splice(fromIndex, 1);
+      targetTasks.splice(toIndex, 0, removed);
+      newTasks[fromQuadrant] = sourceTasks;
+      newTasks[toQuadrant] = targetTasks;
+    }
+
+    return newTasks;
+  });
+};
   useEffect(() => {
     const interval = setInterval(() => setDateTime(new Date()), 1000);
     return () => clearInterval(interval);
@@ -288,14 +301,52 @@ const App = () => {
               />
             ))}
           </div>
-          <button
-            onClick={clearCompletedTasks}
-            className="mt-6 text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
-          >
-            Clear Completed Tasks
-          </button>
+          
+          <div className="flex gap-4 mt-6">
+            <button
+              onClick={clearCompletedTasks}
+              className="text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
+            >
+              Clear Completed Tasks
+            </button>
+            <button
+              onClick={() => setShowNotepad(!showNotepad)}
+              className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 shadow-md font-semibold tracking-wide"
+            >
+              {showNotepad ? "Close Notepad" : "Quick Notes"}
+            </button>
+          </div>
         </div>
       </div>
+      <AnimatePresence>
+        {showNotepad && (
+          <motion.div
+          initial={{ rotateX: 90, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 2 }}
+          exit={{ rotateX: -90, opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          style={{ transformPerspective: 1000 }}
+            className="fixed bottom-4 right-4 w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10 "
+          >
+            <div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center">
+              <span className="text-xs font-semibold text-gray-700">Quick Notes</span>
+              <button
+                onClick={() => setShowNotepad(false)}
+                className="text-gray-500 hover:text-gray-700 text-xs"
+              >
+                ×
+              </button>
+            </div>
+            <textarea
+              className="flex-1 p-2 text-xs resize-none focus:outline-none bg-gray-50 rounded-b-lg"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Jot down your thoughts here..."
+              autoFocus
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </DndProvider>
   );
 };
