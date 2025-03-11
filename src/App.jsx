@@ -103,9 +103,9 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
   });
 
   return (
-    <div ref={drop} className={`p-2 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}>
-      <h2 className="text-md font-semibold mb-1 text-gray-700">{title}</h2>
-      <ul className="space-y-2 flex-1">
+    <div ref={drop} className={`p-1.5 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}>
+      <h2 className="text-md font-semibold  text-gray-700">{title}</h2>
+      <ul className="space-y-0 flex-1">
         <AnimatePresence>
           {tasks.map((task, index) => (
             <TaskItem
@@ -220,6 +220,19 @@ const App = () => {
     });
   };
 
+  //sets all quadrant arrays to empty 
+const tasksreset=()=>
+{
+setTasks(
+  {
+    urgentImportant: [],
+    notUrgentImportant: [],
+    urgentNotImportant: [],
+    notUrgentNotImportant: [],
+  }
+)
+};
+
 const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
   setTasks((prev) => {
     // Prevent invalid moves
@@ -286,7 +299,7 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 w-full">
             {Object.entries(categories).map(([key, { title, color }]) => (
               <CategoryColumn
                 key={key}
@@ -302,7 +315,7 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
             ))}
           </div>
           
-          <div className="flex gap-4 mt-6">
+          <div className="flex gap-2 mt-4">
             <button
               onClick={clearCompletedTasks}
               className="text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
@@ -314,6 +327,12 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
               className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 shadow-md font-semibold tracking-wide"
             >
               {showNotepad ? "Close Notepad" : "Quick Notes"}
+            </button>
+            <button
+              onClick={tasksreset}
+              className="text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide ml-auto"
+            >
+              Reset all Tasks
             </button>
           </div>
         </div>
