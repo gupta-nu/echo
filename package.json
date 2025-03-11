@@ -13,7 +13,7 @@
     "@heroicons/react": "^2.2.0",
     "autoprefixer": "^10.4.20",
     "D": "^1.0.0",
-    "framer-motion": "^12.4.7",
+    "framer-motion": "^12.4.12",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-circular-progressbar": "^2.2.0",

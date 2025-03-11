@@ -301,13 +301,21 @@ const App = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="min-h-screen bg-gray-100 p-6 font-['Noto Sans JP'] flex flex-col items-center">
-        <div className="mt-0 mb-3 text-xs text-black font-mono tracking-wide font-['Noto Sans JP']">
+      <div className="min-h-screen bg-gray-100 p-3 font-['Noto Sans JP'] flex flex-col items-center">
+        <div className="mt-0 mb-1 text-xs text-black font-mono tracking-wide font-['Noto Sans JP']">
           {dateTime.toLocaleString()}
         </div>
-        <div className="w-full max-w-6xl">
+        <div className="w-full max-w-7xl">
+          <div className="flex flex-col gap-2 mb-2">
+            <h1 className="text-2xl font-bold text-gray-800">Echo!</h1>
+            <button
+              onClick={() => setShowTimeSlotForm(true)}
+              className="text-xs px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md font-semibold tracking-wide w-fit"
+            >
+              Add Time Slots
+            </button>
+          </div>
           <div className="flex items-center gap-4 mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Echo!</h1>
             <div className="flex items-center justify-between flex-1 bg-white p-1 rounded-lg shadow-md border border-gray-300 w-[250px]">
               <input
                 type="text"
@@ -327,12 +335,6 @@ const App = () => {
                 ))}
               </select>
             </div>
-            <button
-              onClick={() => setShowTimeSlotForm(true)}
-              className="text-xs px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md font-semibold tracking-wide"
-            >
-              Add Time Slots
-            </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1 w-full">
             {Object.entries(categories).map(([key, { title, color }]) => (
