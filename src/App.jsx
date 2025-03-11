@@ -31,32 +31,17 @@ const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditin
       const dragQuadrant = item.quadrant;
       const hoverQuadrant = quadrant;
 
-      // Don't replace items with themselves
       if (dragIndex === hoverIndex && dragQuadrant === hoverQuadrant) return;
 
-      // Determine rectangle on screen
       const hoverBoundingRect = ref.current.getBoundingClientRect();
-      
-      // Get vertical middle
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      
-      // Get mouse position
       const clientOffset = monitor.getClientOffset();
-      
-      // Get pixels to the top
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      // Only perform the move when the mouse has crossed half of the items height
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-      // Time to actually perform the action
       moveTask(dragQuadrant, dragIndex, hoverQuadrant, hoverIndex);
-
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
       item.index = hoverIndex;
     },
   });
@@ -86,7 +71,10 @@ const TaskItem = ({ task, index, quadrant, moveTask, toggleComplete, startEditin
           autoFocus
         />
       ) : (
-        task.text
+        <div>
+          <div>{task.text}</div>
+          <div className="text-xs text-gray-500">{task.times}</div>
+        </div>
       )}
     </motion.li>
   );
@@ -103,9 +91,9 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
   });
 
   return (
-    <div ref={drop} className={`p-2 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}>
-      <h2 className="text-md font-semibold mb-1 text-gray-700">{title}</h2>
-      <ul className="space-y-2 flex-1">
+    <div ref={drop} className={`p-1.5 rounded-xl border ${color} shadow-md min-h-[300px] flex flex-col`}>
+      <h2 className="text-md font-semibold  text-gray-700">{title}</h2>
+      <ul className="space-y-0 flex-1">
         <AnimatePresence>
           {tasks.map((task, index) => (
             <TaskItem
@@ -125,11 +113,9 @@ const CategoryColumn = ({ quadrant, title, color, tasks, moveTask, toggleComplet
   );
 };
 
-
 const App = () => {
   const [showNotepad, setShowNotepad] = useState(false);
   const [notes, setNotes] = useState("");
-  
   const [dateTime, setDateTime] = useState(new Date());
   const [task, setTask] = useState("");
   const [selectedQuadrant, setSelectedQuadrant] = useState("urgentImportant");
@@ -139,32 +125,42 @@ const App = () => {
     urgentNotImportant: [],
     notUrgentNotImportant: [],
   });
+  const [showTimeSlotForm, setShowTimeSlotForm] = useState(false);
+  const [timeSlotsSelected, setTimeSlotsSelected] = useState([]);
 
-  // Load tasks from localStorage
+  const timeSlots = Array.from({ length: 24 }, (_, i) => {
+    const start = String(i).padStart(2, '0');
+    const end = String((i + 1) % 24).padStart(2, '0');
+    const periodStart = i < 12 ? 'AM' : 'PM';
+    const periodEnd = (i + 1) < 12 ? 'AM' : 'PM';
+    const label = `${i % 12 === 0 ? 12 : i % 12}:00 ${periodStart} - ${(i + 1) % 12 === 0 ? 12 : (i + 1) % 12}:00 ${periodEnd}`;
+    return { value: `${start}-${end}`, label };
+  });
+
   useEffect(() => {
     const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) setTasks(JSON.parse(savedTasks));
   }, []);
 
-  // Save tasks to localStorage
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
-  // load takss from localstorage
+
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
     if (savedNotes) setNotes(savedNotes);
   }, []);
-  //save tasks from localstorage
+
   useEffect(() => {
     localStorage.setItem("notes", notes);
   }, [notes]);
 
   const addTask = () => {
-    if (task.trim() === "") return;
+    if (task.trim() === "" || timeSlotsSelected.length === 0) return;
     const newTask = {
       id: Date.now(),
       text: task,
+      times: mergeTimeSlots(timeSlotsSelected),
       completed: false,
       editing: false,
     };
@@ -173,10 +169,47 @@ const App = () => {
       [selectedQuadrant]: [...prev[selectedQuadrant], newTask],
     }));
     setTask("");
+    setTimeSlotsSelected([]);
+    setShowTimeSlotForm(false);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") addTask();
+  };
+
+  const handleTimeSlotChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setTimeSlotsSelected(selectedOptions);
+  };
+
+  const mergeTimeSlots = (slots) => {
+    if (!slots.length) return '';
+
+    const sorted = slots.map(slot => slot.split('-').map(Number)).sort((a, b) => a[0] - b[0]);
+
+    let merged = [];
+    let start = sorted[0][0], end = sorted[0][1];
+
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i][0] === end) {
+        end = sorted[i][1];
+      } else {
+        merged.push({ start, end });
+        start = sorted[i][0];
+        end = sorted[i][1];
+      }
+    }
+    merged.push({ start, end });
+
+    return merged.map(({ start, end }) => formatTimeRange(start, end)).join(', ');
+  };
+
+  const formatTimeRange = (start, end) => {
+    const formatTime = (hour) => {
+      const period = hour < 12 ? 'AM' : 'PM';
+      return `${hour % 12 === 0 ? 12 : hour % 12}:00 ${period}`;
+    };
+    return `${formatTime(start)} - ${formatTime(end)}`;
   };
 
   const toggleComplete = (quadrant, index) => {
@@ -220,38 +253,47 @@ const App = () => {
     });
   };
 
-const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
-  setTasks((prev) => {
-    // Prevent invalid moves
-    if (
-      fromIndex < 0 ||
-      fromIndex >= prev[fromQuadrant].length ||
-      toIndex < 0 ||
-      toIndex > prev[toQuadrant].length
-    ) {
-      return prev;
-    }
+  const tasksreset = () => {
+    setTasks({
+      urgentImportant: [],
+      notUrgentImportant: [],
+      urgentNotImportant: [],
+      notUrgentNotImportant: [],
+    });
+  };
 
-    const newTasks = { ...prev };
-    const movedTask = newTasks[fromQuadrant][fromIndex];
+  const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
+    setTasks((prev) => {
+      if (
+        fromIndex < 0 ||
+        fromIndex >= prev[fromQuadrant].length ||
+        toIndex < 0 ||
+        toIndex > prev[toQuadrant].length
+      ) {
+        return prev;
+      }
 
-    if (fromQuadrant === toQuadrant) {
-      const tasksCopy = [...newTasks[fromQuadrant]];
-      const [removed] = tasksCopy.splice(fromIndex, 1);
-      tasksCopy.splice(toIndex, 0, removed);
-      newTasks[fromQuadrant] = tasksCopy;
-    } else {
-      const sourceTasks = [...newTasks[fromQuadrant]];
-      const targetTasks = [...newTasks[toQuadrant]];
-      const [removed] = sourceTasks.splice(fromIndex, 1);
-      targetTasks.splice(toIndex, 0, removed);
-      newTasks[fromQuadrant] = sourceTasks;
-      newTasks[toQuadrant] = targetTasks;
-    }
+      const newTasks = { ...prev };
+      const movedTask = newTasks[fromQuadrant][fromIndex];
 
-    return newTasks;
-  });
-};
+      if (fromQuadrant === toQuadrant) {
+        const tasksCopy = [...newTasks[fromQuadrant]];
+        const [removed] = tasksCopy.splice(fromIndex, 1);
+        tasksCopy.splice(toIndex, 0, removed);
+        newTasks[fromQuadrant] = tasksCopy;
+      } else {
+        const sourceTasks = [...newTasks[fromQuadrant]];
+        const targetTasks = [...newTasks[toQuadrant]];
+        const [removed] = sourceTasks.splice(fromIndex, 1);
+        targetTasks.splice(toIndex, 0, removed);
+        newTasks[fromQuadrant] = sourceTasks;
+        newTasks[toQuadrant] = targetTasks;
+      }
+
+      return newTasks;
+    });
+  };
+
   useEffect(() => {
     const interval = setInterval(() => setDateTime(new Date()), 1000);
     return () => clearInterval(interval);
@@ -285,8 +327,14 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
                 ))}
               </select>
             </div>
+            <button
+              onClick={() => setShowTimeSlotForm(true)}
+              className="text-xs px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md font-semibold tracking-wide"
+            >
+              Add Time Slots
+            </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 w-full">
             {Object.entries(categories).map(([key, { title, color }]) => (
               <CategoryColumn
                 key={key}
@@ -301,8 +349,7 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
               />
             ))}
           </div>
-          
-          <div className="flex gap-4 mt-6">
+          <div className="flex gap-2 mt-4">
             <button
               onClick={clearCompletedTasks}
               className="text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide"
@@ -315,18 +362,68 @@ const moveTask = (fromQuadrant, fromIndex, toQuadrant, toIndex) => {
             >
               {showNotepad ? "Close Notepad" : "Quick Notes"}
             </button>
+            <button
+              onClick={tasksreset}
+              className="text-xs px-3 py-1 bg-[#80011f] text-white rounded-lg hover:bg-red-700 transition duration-200 shadow-md font-semibold tracking-wide ml-auto"
+            >
+              Reset all Tasks
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Time Slot Form Modal */}
+      <AnimatePresence>
+        {showTimeSlotForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20"
+            onClick={() => setShowTimeSlotForm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="bg-white p-6 rounded-lg shadow-lg w-96"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-lg font-semibold mb-4">Select Time Slots</h2>
+              <select
+                multiple
+                value={timeSlotsSelected}
+                onChange={handleTimeSlotChange}
+                className="w-full p-2 border border-gray-300 rounded-md mb-4"
+                size="5"
+              >
+                {timeSlots.map(slot => (
+                  <option key={slot.value} value={slot.value}>
+                    {slot.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={addTask}
+                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-200"
+              >
+                Add Task
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Notepad Modal */}
       <AnimatePresence>
         {showNotepad && (
           <motion.div
-          initial={{ rotateX: 90, opacity: 0 }}
-          animate={{ rotateX: 0, opacity: 2 }}
-          exit={{ rotateX: -90, opacity: 1 }}
-          transition={{ duration: 0.4 }}
-          style={{ transformPerspective: 1000 }}
-            className="fixed  w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10 "
+            initial={{ rotateX: 90, opacity: 0 }}
+            animate={{ rotateX: 0, opacity: 2 }}
+            exit={{ rotateX: -90, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            style={{ transformPerspective: 1000 }}
+            className="fixed w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10"
           >
             <div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center">
               <span className="text-xs font-semibold text-gray-700">Quick Notes</span>
