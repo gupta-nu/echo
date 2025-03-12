@@ -85,8 +85,7 @@ Once completed, Vercel will provide a live URL where your app is hosted.
 ---
 
 ## Future Enhancements
--fix notepadd
--fix add configuraton to be able to add by enter 
+
 - User Authentication & Multi-User Support  
 - Real-Time Collaboration  
 - Distributed Task Processing (Event Sourcing with Kafka, CQRS, Redis Caching)  
