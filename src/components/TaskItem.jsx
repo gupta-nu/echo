@@ -55,7 +55,7 @@ const TaskItem = ({
       ref={ref}
       
       className={`p-1.5 text-xs bg-gray-100 border border-gray-200 rounded-md shadow-xs flex items-center transition-all duration-150 cursor-pointer ${
-        task.completed ? "line-through text-gray-400" : ""
+        task.completed ? "line-through text-black" : ""
       } ${isDragging ? "opacity-50" : ""}`}
       onClick={() => toggleComplete(quadrant, index)}
       onDoubleClick={() => startEditing(quadrant, index, task.text)}
@@ -75,7 +75,7 @@ const TaskItem = ({
         <div className="flex flex-col">
           <div className="font-medium">{task.text}</div>
           {task.times && (
-             <div className="text-[18px] text-gray-500">{task.times}</div>
+             <div className="text-[18px] text-black">{task.times}</div>
           )}
         </div>
       )}

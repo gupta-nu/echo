@@ -26,7 +26,8 @@ const CategoryColumn = ({
       ref={drop}
       className={`p-2 rounded-xl border-2 ${color} shadow-lg min-h-[300px] flex flex-col`}
     >
-      <h2 className="text-sm font-semibold mb-1 text-gray-700">{title}</h2>
+      <h2 className="text-sm font-semibold mb-1 text-black
+      ">{title}</h2>
       <ul className="space-y-1 flex-1">
         <AnimatePresence>
           {tasks.map((task, index) => (

@@ -49,7 +49,7 @@ const TimeSlotModal = ({
                 </option>
               ))}
             </select>
-            <div className="text-xs text-gray-500 mb-4">
+            <div className="text-xs text-black mb-4">
               Selected: {mergeTimeSlots(timeSlotsSelected)}
             </div>
             <button

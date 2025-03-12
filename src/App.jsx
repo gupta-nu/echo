@@ -146,7 +146,7 @@ const App = () => {
         </div>
         <div className="w-full max-w-7xl">
           <div className="flex flex-col gap-2 mb-2">
-            <h1 className="text-2xl font-bold text-gray-800">Echo!</h1>
+            <h1 className="text-2xl font-bold text-black">Echo!</h1>
             <button
               onClick={() => setShowTimeSlotForm(true)}
               className="text-xs px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md w-fit"
@@ -159,14 +159,14 @@ const App = () => {
           <div className="flex items-center justify-between flex-1 bg-white p-0.5 rounded-md shadow-sm border border-gray-200 w-[220px]">
       <input
         type="text"
-        className="w-full p-1 border-none outline-none text-gray-800 text-xs"
+        className="w-full p-1 border-none outline-none text-black text-xs"
         placeholder="Enter task (press Enter to add)"
         value={task}
         onChange={(e) => setTask(e.target.value)}
         onKeyDown={handleKeyDown}
       />
       <select
-        className="p-1 border border-gray-300 rounded-md bg-white text-gray-700 text-xs"
+        className="p-1 border border-gray-300 rounded-md bg-white text-black text-xs"
         value={selectedQuadrant}
         onChange={(e) => setSelectedQuadrant(e.target.value)}
       >

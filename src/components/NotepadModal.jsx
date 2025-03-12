@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 
 const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
@@ -11,10 +12,10 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
       className="fixed w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10"
     >
 <div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center">
-              <span className="text-xs font-semibold text-gray-700">Quick Notes</span>
+              <span className="text-xs font-semibold text-black">Quick Notes</span>
               <button
                 onClick={() => setShowNotepad(false)}
-                className="text-gray-500 hover:text-gray-700 text-xs"
+                className="text-black hover:text-black text-xs"
               >
                 ❌
               </button>
