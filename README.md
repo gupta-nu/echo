@@ -91,7 +91,7 @@ Once completed, Vercel will provide a live URL where your app is hosted.
 - Distributed Task Processing (Event Sourcing with Kafka, CQRS, Redis Caching)  
 - Offline-First Architecture  
 - Nested Subtasks (Ability to create sub-tasks within a task)  
-- Enhanced Notepad Features (Rich text formatting, tagging, and search)  
-
+- Enhanced Notepad Features (Rich text formatting, tagging, and search,drag the notepad anywhere in the application,)  
+- to be able to add timeslot for exsiting tasks when doubleclick to implement the button below the edit to add timeslot
 ---
 
