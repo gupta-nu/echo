@@ -20,3 +20,6 @@
 .dragging {
   @apply opacity-50 scale-95;
 }
+.text-black {
+  color: black !important;
+}
