@@ -59,6 +59,7 @@ const App = () => {
     }));
     setTask("");
     setTimeSlotsSelected([]);
+    setShowTimeSlotForm(false);
   };
 
   const handleKeyDown = (e) => 
