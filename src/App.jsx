@@ -141,7 +141,7 @@ const App = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-<div className="min-h-screen bg-gray-100 p-3 font-['Noto Sans JP'] flex flex-col items-center">        
+<div className="min-h-screen bg-gray-100 p-3 font-['Noto Sans JP'] flex flex-col items-center text-black">        
   <div className="mt-0 mb-1 text-xs  text-black dark:text font-mono">
           {dateTime.toLocaleString()}
         </div>
