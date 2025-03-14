@@ -142,7 +142,7 @@ const App = () => {
   return (
     <DndProvider backend={HTML5Backend}>
 <div className="min-h-screen bg-gray-100 p-3 font-['Noto Sans JP'] flex flex-col items-center">        
-  <div className="mt-0 mb-1 text-xs text-black font-mono">
+  <div className="mt-0 mb-1 text-xs  text-black dark:text font-mono">
           {dateTime.toLocaleString()}
         </div>
         <div className="w-full max-w-7xl">
@@ -150,14 +150,14 @@ const App = () => {
             <h1 className="text-2xl font-bold text-black">Echo!</h1>
             <button
               onClick={() => setShowTimeSlotForm(true)}
-              className="text-xs px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md w-fit"
+              className="text-xs px-3 py-1 bg-green-600  text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md w-fit"
             >
               Add Time Slots
             </button>
           </div>
 
           <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center justify-between flex-1 bg-white p-0.5 rounded-md shadow-sm border border-gray-200 w-[220px]">
+          <div className="flex items-center justify-between flex-1 bg-white  text-black dark:text p-0.5 rounded-md shadow-sm border border-gray-200 w-[220px]">
       <input
         type="text"
         className="w-full p-1 border-none outline-none text-black text-xs"
@@ -167,7 +167,7 @@ const App = () => {
         onKeyDown={handleKeyDown}
       />
       <select
-        className="p-1 border border-gray-300 rounded-md bg-white text-black text-xs"
+        className="p-1 border border-gray-300 rounded-md bg-white  text-black dark:text text-xs"
         value={selectedQuadrant}
         onChange={(e) => setSelectedQuadrant(e.target.value)}
       >
