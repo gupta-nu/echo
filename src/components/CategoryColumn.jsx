@@ -10,7 +10,8 @@ const CategoryColumn = ({
   moveTask,
   toggleComplete,
   startEditing,
-  updateTask
+  updateTask,
+  onDelete
 }) => {
   const [, drop] = useDrop({
     accept: "TASK",
@@ -23,6 +24,8 @@ const CategoryColumn = ({
 
   return (
     <div 
+
+    
       ref={drop}
       className={`p-2 rounded-xl border-2 ${color} shadow-lg min-h-[300px] flex flex-col`}
     >
@@ -40,6 +43,7 @@ const CategoryColumn = ({
               toggleComplete={toggleComplete}
               startEditing={startEditing}
               updateTask={updateTask}
+              onDelete={onDelete}
             />
           ))}
         </AnimatePresence>

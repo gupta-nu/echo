@@ -1,6 +1,7 @@
 import { useDrag, useDrop } from "react-dnd";
 import { motion } from "framer-motion";
 import { useRef } from "react";
+import { Trash2 } from "lucide-react"; // Importing trash icon
 
 const TaskItem = ({ 
   task, 
@@ -9,7 +10,8 @@ const TaskItem = ({
   moveTask, 
   toggleComplete, 
   startEditing, 
-  updateTask 
+  updateTask,
+  onDelete 
 }) => {
   const ref = useRef(null);
 
@@ -53,7 +55,6 @@ const TaskItem = ({
   return (
     <motion.li
       ref={ref}
-      
       className={`p-1.5 text-xs bg-gray-100 border border-gray-200 rounded-md shadow-xs flex items-center transition-all duration-150 cursor-pointer ${
         task.completed ? "line-through text-black" : ""
       } ${isDragging ? "opacity-50" : ""}`}
@@ -72,13 +73,22 @@ const TaskItem = ({
           autoFocus
         />
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1">
           <div className="font-medium">{task.text}</div>
           {task.times && (
              <div className="text-[18px] text-black">{task.times}</div>
           )}
         </div>
       )}
+      {/* Trash Icon */}
+      <Trash2 
+        size={14} 
+        className="ml-auto text-gray-400 hover:text-red-500 transition cursor-pointer" 
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent triggering complete toggle
+          onDelete(quadrant, index);
+        }} 
+      />
     </motion.li>
   );
 };

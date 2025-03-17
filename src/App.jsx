@@ -138,6 +138,12 @@ const App = () => {
       notUrgentNotImportant: [],
     });
   };
+  const deleteTask = (quadrant, index) => {
+    setTasks(prev => ({
+      ...prev,
+      [quadrant]: prev[quadrant].filter((_, i) => i !== index)
+    }));
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -161,7 +167,7 @@ const App = () => {
       <input
         type="text"
         className="w-full p-1 border-none outline-none text-black text-xs"
-        placeholder="Enter task (press Enter to add)"
+        placeholder="Enter task (press enter to add task,single click to strike it out and double to edit it)"
         value={task}
         onChange={(e) => setTask(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -189,6 +195,7 @@ const App = () => {
                 toggleComplete={toggleComplete}
                 startEditing={startEditing}
                 updateTask={updateTask}
+                onDelete={deleteTask}
               />
             ))}
           </div>
