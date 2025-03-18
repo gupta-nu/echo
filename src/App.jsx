@@ -7,10 +7,12 @@ import { mergeTimeSlots, formatTimeRange } from "./utils/helpers";
 import CategoryColumn from "./components/CategoryColumn";
 import NotepadModal from "./components/NotepadModal";
 import TimeSlotModal from "./components/TimeSlotModal";
+import './utils/prism-config';
+
 
 const App = () => {
   const [showNotepad, setShowNotepad] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState([]);
   const [dateTime, setDateTime] = useState(new Date());
   const [task, setTask] = useState("");
   const [selectedQuadrant, setSelectedQuadrant] = useState("urgentImportant");
@@ -29,12 +31,12 @@ const App = () => {
     if (savedTasks) setTasks(JSON.parse(savedTasks));
     
     const savedNotes = localStorage.getItem("notes");
-    if (savedNotes) setNotes(savedNotes);
+    if (savedNotes) setNotes(JSON.parse(savedNotes));
   }, []);
 
   // Save data
   useEffect(() => localStorage.setItem("tasks", JSON.stringify(tasks)), [tasks]);
-  useEffect(() => localStorage.setItem("notes", notes), [notes]);
+  useEffect(() => localStorage.setItem("notes", JSON.stringify(notes)), [notes])
 
   // Clock update
   useEffect(() => {
@@ -235,12 +237,13 @@ const App = () => {
         </AnimatePresence>
 
         <AnimatePresence>
-          {showNotepad && (
+        {showNotepad && (
             <NotepadModal
+              key="notepad-modal"
               showNotepad={showNotepad}
               setShowNotepad={setShowNotepad}
-              notes={notes}
-              setNotes={setNotes}
+              notes={notes}         // Pass array instead of string
+              setNotes={setNotes}   // Pass state setter
             />
           )}
         </AnimatePresence>
