@@ -93,5 +93,10 @@ Once completed, Vercel will provide a live URL where your app is hosted.
 - Nested Subtasks (Ability to create sub-tasks within a task)  
 - Enhanced Notepad Features (Rich text formatting, tagging, and search,drag the notepad anywhere in the application,)  
 - to be able to add timeslot for exsiting tasks when doubleclick to implement the button below the edit to add timeslot
+- add note history . storing notes multiple notes
+- room feature where u can create a room to work on taskmangagment with group with code,there you can have collaborative notes
+- proper text editing and markdown for notepad
+- to be able to edit timeslot on a task
+- 
 ---
 
