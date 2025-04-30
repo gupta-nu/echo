@@ -1,32 +1,49 @@
-
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
+  const modalRef = useRef();
+
+  // Close modal on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowNotepad(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setShowNotepad]);
+
   return (
     <motion.div
+      ref={modalRef}
+      drag
+      dragConstraints={{ left: 0, right: 1000, top: 0, bottom: 1000 }}
       initial={{ rotateX: 90, opacity: 0 }}
       animate={{ rotateX: 0, opacity: 1 }}
       exit={{ rotateX: -90, opacity: 0 }}
       transition={{ duration: 0.4 }}
       style={{ transformPerspective: 1000 }}
-      className="fixed w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-10"
+      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50 cursor-move"
     >
-<div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center">
-              <span className="text-xs font-semibold text-black">Quick Notes</span>
-              <button
-                onClick={() => setShowNotepad(false)}
-                className="text-black hover:text-black text-xs"
-              >
-                ❌
-              </button>
-            </div>
-            <textarea
-              className="flex-1 p-2 text-xs resize-none focus:outline-none bg-gray-50 rounded-b-lg"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Jot down your thoughts here..."
-              autoFocus
-            />    </motion.div>
+      <div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center cursor-grab">
+        <span className="text-xs font-semibold text-black">Quick Notes</span>
+        <button
+          onClick={() => setShowNotepad(false)}
+          className="text-black hover:text-black text-xs"
+        >
+          ❌
+        </button>
+      </div>
+      <textarea
+        className="flex-1 p-2 text-xs resize-none focus:outline-none bg-gray-50 rounded-b-lg"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Jot down your thoughts here..."
+        autoFocus
+      />
+    </motion.div>
   );
 };
 
