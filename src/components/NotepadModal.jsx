@@ -1,8 +1,24 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
   const modalRef = useRef();
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Close modal on outside click
   useEffect(() => {
@@ -19,13 +35,18 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
     <motion.div
       ref={modalRef}
       drag
-      dragConstraints={{ left: 0, right: 1000, top: 0, bottom: 1000 }}
+      dragConstraints={{
+        left: 0,
+        right: windowDimensions.width - 400, // 400 is the width of the modal (adjust if needed)
+        top: 0,
+        bottom: windowDimensions.height - 600, // 600 is the height of the modal (adjust if needed)
+      }}
       initial={{ rotateX: 90, opacity: 0 }}
       animate={{ rotateX: 0, opacity: 1 }}
       exit={{ rotateX: -90, opacity: 0 }}
       transition={{ duration: 0.4 }}
       style={{ transformPerspective: 1000 }}
-      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50 cursor-move"
+      className="fixed w-96 h-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50 cursor-move"
     >
       <div className="p-2 bg-gray-100 rounded-t-lg flex justify-between items-center cursor-grab">
         <span className="text-xs font-semibold text-black">Quick Notes</span>
