@@ -14,6 +14,39 @@ const TaskItem = ({
   onDelete
 }) => {
   const ref = useRef(null);
+  
+  // Define task item styles based on quadrant number
+  const getQuadrantStyles = (quadrantNumber) => {
+    const styles = {
+      1: {
+        background: "bg-gradient-to-r from-blue-100 to-indigo-100",
+        border: "border-l-4 border-l-blue-500",
+        activeColor: "text-blue-500"
+      },
+      2: {
+        background: "bg-gradient-to-r from-green-100 to-teal-100",
+        border: "border-l-4 border-l-green-500",
+        activeColor: "text-green-500"
+      },
+      3: {
+        background: "bg-gradient-to-r from-yellow-100 to-amber-100",
+        border: "border-l-4 border-l-yellow-500",
+        activeColor: "text-yellow-600"
+      },
+      4: {
+        background: "bg-gradient-to-r from-red-100 to-rose-100",
+        border: "border-l-4 border-l-red-500",
+        activeColor: "text-red-500"
+      }
+    };
+    
+    return styles[quadrantNumber] || styles[1];
+  };
+  
+  // Use the actual quadrant number to determine styling
+  const quadrantStyles = getQuadrantStyles(quadrant);
+  
+  // Set up drag functionality
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: { index, quadrant },
@@ -22,6 +55,7 @@ const TaskItem = ({
     }),
   });
   
+  // Set up drop functionality
   const [, drop] = useDrop({
     accept: "TASK",
     hover(item, monitor) {
@@ -43,10 +77,13 @@ const TaskItem = ({
       
       moveTask(dragQuadrant, dragIndex, hoverQuadrant, hoverIndex);
       item.index = hoverIndex;
+      item.quadrant = hoverQuadrant; // Update the quadrant when moving between columns
     },
   });
   
+  // Connect drag and drop refs
   drag(drop(ref));
+  
   if (!task) return null;
   
   // Define the variants for task animation
@@ -64,11 +101,10 @@ const TaskItem = ({
   return (
     <motion.li
       ref={ref}
-      className={`p-3 mb-2 rounded-lg shadow-sm transition-all duration-150 ${
-        task.completed ? "bg-gray-100" : "bg-white"
-      } ${isDragging ? "opacity-50 shadow-lg" : ""} border ${
-        task.completed ? "border-gray-200" : "border-gray-200 hover:border-blue-300"
-      }`}
+      className={`p-3 mb-2 rounded-lg shadow-sm transition-all duration-150 
+        ${quadrantStyles.background} ${quadrantStyles.border}
+        ${task.completed ? "opacity-75" : ""} 
+        ${isDragging ? "opacity-50 shadow-lg" : ""}`}
       initial="hidden"
       animate="visible"
       exit="exit"
@@ -86,7 +122,7 @@ const TaskItem = ({
           onClick={() => toggleComplete(quadrant, index)}
         >
           {task.completed ? (
-            <CheckCircle size={16} className="text-green-500" />
+            <CheckCircle size={16} className={quadrantStyles.activeColor} />
           ) : (
             <Circle size={16} className="text-gray-400" />
           )}
@@ -127,7 +163,7 @@ const TaskItem = ({
           {!task.editing && (
             <button
               onClick={handleEdit}
-              className="p-1 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-gray-100"
+              className={`p-1 text-gray-400 hover:${quadrantStyles.activeColor} transition-colors rounded-full hover:bg-white hover:bg-opacity-40`}
             >
               <Edit size={14} />
             </button>
@@ -137,7 +173,7 @@ const TaskItem = ({
               e.stopPropagation();
               onDelete(quadrant, index);
             }}
-            className="p-1 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-100"
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-white hover:bg-opacity-40"
           >
             <Trash2 size={14} />
           </button>
