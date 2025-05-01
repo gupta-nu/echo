@@ -17,7 +17,14 @@ import {
   ChevronLeft,
   Moon,
   Sun,
-  AlertTriangle
+  AlertTriangle,
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Heading,
+  Quote,
+  HelpCircle
 } from "lucide-react";
 
 const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
@@ -36,6 +43,7 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
   // Load saved position from localStorage on mount
@@ -118,6 +126,93 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "b") {
       e.preventDefault();
       setSidebarVisible(prev => !prev);
+    }
+    
+    // Special keyboard shortcuts for text formatting
+    if ((e.ctrlKey || e.metaKey) && e.key === "i") {
+      e.preventDefault();
+      applyFormatting("*", "*"); // Italic
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+      e.preventDefault();
+      applyFormatting("**", "**"); // Bold
+    }
+    
+    // Handle markdown syntax conversion on space
+    if (e.key === " " && textareaRef.current) {
+      const textarea = textareaRef.current;
+      const { value, selectionStart } = textarea;
+      
+      // Find the start of the current line
+      const lastNewlineIndex = value.lastIndexOf('\n', selectionStart - 1);
+      const lineStart = lastNewlineIndex === -1 ? 0 : lastNewlineIndex + 1;
+      const currentLine = value.substring(lineStart, selectionStart);
+      
+      // Handle different markdown starting patterns
+      let newText = value;
+      let cursorOffset = 1; // Default cursor offset (space)
+      let shouldPreventDefault = false;
+
+      // Bullet list: "-" to "•"
+      if (currentLine === "-") {
+        shouldPreventDefault = true;
+        const beforeDash = value.substring(0, lineStart);
+        const afterDash = value.substring(lineStart + 1);
+        newText = beforeDash + "• " + afterDash;
+        cursorOffset = 2; // After the bullet and space
+      } 
+      // Numbered list: "1." to "1. "
+      else if (/^\d+\.$/.test(currentLine)) {
+        shouldPreventDefault = true;
+        newText = value.substring(0, selectionStart) + " " + value.substring(selectionStart);
+        cursorOffset = 1; // Just the space
+      }
+      // Headings: "#", "##", "###" etc.
+      else if (/^#{1,6}$/.test(currentLine)) {
+        shouldPreventDefault = true;
+        newText = value.substring(0, selectionStart) + " " + value.substring(selectionStart);
+        cursorOffset = 1; // Just the space
+      }
+      // Blockquote: ">" to "> "
+      else if (currentLine === ">") {
+        shouldPreventDefault = true;
+        newText = value.substring(0, selectionStart) + " " + value.substring(selectionStart);
+        cursorOffset = 1; // Just the space
+      }
+      // Horizontal rule: "---" to an actual horizontal rule
+      else if (currentLine === "---") {
+        shouldPreventDefault = true;
+        const beforeText = value.substring(0, lineStart);
+        const afterText = value.substring(lineStart + 3);
+        newText = beforeText + "――――――――――――――" + afterText;
+        cursorOffset = 0; // Place cursor at the end of the line
+      }
+      // Task list: "[ ]" or "[]" to "☐ " (unchecked box)
+      else if (currentLine === "[ " || currentLine === "[") {
+        shouldPreventDefault = true;
+        const beforeText = value.substring(0, lineStart);
+        const afterText = value.substring(selectionStart);
+        newText = beforeText + "☐ " + afterText;
+        cursorOffset = 2; // After the checkbox and space
+      }
+      // Task list: "[x" or "[X" to "☑ " (checked box)
+      else if (currentLine === "[x" || currentLine === "[X") {
+        shouldPreventDefault = true;
+        const beforeText = value.substring(0, lineStart);
+        const afterText = value.substring(selectionStart);
+        newText = beforeText + "☑ " + afterText;
+        cursorOffset = 2; // After the checkbox and space
+      }
+
+      if (shouldPreventDefault) {
+        e.preventDefault();
+        updateCurrentNote(newText);
+        
+        // Adjust cursor position
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = selectionStart + cursorOffset - currentLine.length + 1;
+        }, 10);
+      }
     }
   };
 
@@ -243,6 +338,95 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
       console.error("Error downloading notes:", error);
     }
   };
+  
+  // Helper function to apply text formatting (bold, italic, etc.)
+  const applyFormatting = (prefix, suffix) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = notes[currentNoteIndex].substring(start, end);
+    
+    // If text is selected, wrap it with formatting markers
+    if (start !== end) {
+      const newText = 
+        notes[currentNoteIndex].substring(0, start) + 
+        prefix + selectedText + suffix + 
+        notes[currentNoteIndex].substring(end);
+      
+      updateCurrentNote(newText);
+      
+      // Position cursor after the formatted text
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(end + prefix.length + suffix.length, end + prefix.length + suffix.length);
+      }, 10);
+    } 
+    // If no text is selected, insert formatting markers and position cursor between them
+    else {
+      const newText = 
+        notes[currentNoteIndex].substring(0, start) + 
+        prefix + suffix + 
+        notes[currentNoteIndex].substring(end);
+      
+      updateCurrentNote(newText);
+      
+      // Position cursor between the formatting markers
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length);
+      }, 10);
+    }
+  };
+  
+  // Helper function to insert text at the start of the current line
+  const insertAtLineStart = (text) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const { value, selectionStart } = textarea;
+    
+    // Find the start of the current line
+    const lastNewlineIndex = value.lastIndexOf('\n', selectionStart - 1);
+    const lineStart = lastNewlineIndex === -1 ? 0 : lastNewlineIndex + 1;
+    
+    // Check if the line already starts with the text we're trying to insert
+    const currentLinePrefix = value.substring(lineStart, lineStart + text.length);
+    
+    if (currentLinePrefix === text) {
+      // If line already starts with our text, remove it (toggle behavior)
+      const newText = 
+        value.substring(0, lineStart) + 
+        value.substring(lineStart + text.length);
+      
+      updateCurrentNote(newText);
+      
+      // Adjust cursor position
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(
+          selectionStart - text.length, 
+          selectionStart - text.length
+        );
+      }, 10);
+    } else {
+      // Otherwise, insert our text at the line start
+      const newText = 
+        value.substring(0, lineStart) + 
+        text + 
+        value.substring(lineStart);
+      
+      updateCurrentNote(newText);
+      
+      // Adjust cursor position
+      const newPosition = selectionStart + text.length;
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newPosition, newPosition);
+      }, 10);
+    }
+  };
 
   const createNewNote = () => {
     // Ask to save changes if there are any
@@ -266,6 +450,57 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
   const formatNoteTitle = (note, index) => {
     const title = note.trim().split("\n")[0] || `Note ${index + 1}`;
     return title.length > 20 ? title.substring(0, 20) + "..." : title || `Note ${index + 1}`;
+  };
+
+  // Enhanced keyup handler for automatic markdown conversion
+  const handleKeyUp = (e) => {
+    if (e.key === 'Enter') {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      
+      const { value, selectionStart } = textarea;
+      
+      // Find the start of the current line
+      const lastNewlineIndex = value.lastIndexOf('\n', selectionStart - 2);
+      const lineStart = lastNewlineIndex === -1 ? 0 : lastNewlineIndex + 1;
+      
+      // Find the end of the previous line
+      const prevLineEnd = value.indexOf('\n', lineStart);
+      if (prevLineEnd === -1 || prevLineEnd >= selectionStart) return;
+      
+      const prevLine = value.substring(lineStart, prevLineEnd);
+      
+      // Check if previous line was a bullet point
+      if (prevLine.startsWith('• ')) {
+        // Add a bullet point at the start of the new line
+        const newText = value.substring(0, selectionStart) + '• ' + value.substring(selectionStart);
+        updateCurrentNote(newText);
+        
+        // Position cursor after the bullet point
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
+        }, 10);
+      }
+      // Check if previous line was a numbered list item (e.g., "1. ")
+      else if (/^\d+\.\s/.test(prevLine)) {
+        // Extract the number and increment it
+        const match = prevLine.match(/^(\d+)\.\s/);
+        if (match) {
+          const num = parseInt(match[1]);
+          const nextNum = num + 1;
+          const prefix = `${nextNum}. `;
+          
+          // Add the next numbered item
+          const newText = value.substring(0, selectionStart) + prefix + value.substring(selectionStart);
+          updateCurrentNote(newText);
+          
+          // Position cursor after the number
+          setTimeout(() => {
+            textarea.selectionStart = textarea.selectionEnd = selectionStart + prefix.length;
+          }, 10);
+        }
+      }
+    }
   };
 
   const containerClasses = isDarkMode 
@@ -501,8 +736,9 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
                   updateCurrentNote(e.target.value);
                 }}
                 onKeyDown={handleKeyDown}
-                className={textareaClasses}
-                placeholder="Start typing your thoughts..."
+                onKeyUp={handleKeyUp}
+                className={`${textareaClasses} mb-8`} // Added margin to make room for toolbar
+                placeholder="Start typing your thoughts... (Use markdown syntax)"
               />
             </div>
           </div>
@@ -548,7 +784,7 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
           <div className={`absolute bottom-0 right-0 p-1 cursor-pointer ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
             <div className="relative group">
               <ExternalLink size={12} />
-              <div className="absolute bottom-full right-0 mb-2 w-48 p-2 rounded shadow-lg hidden group-hover:block z-20 text-xs" 
+              <div className="absolute bottom-full right-0 mb-2 w-52 p-2 rounded shadow-lg hidden group-hover:block z-20 text-xs" 
                    style={{backgroundColor: isDarkMode ? "rgba(17, 24, 39, 0.95)" : "rgba(255, 255, 255, 0.95)"}}>
                 <p className={isDarkMode ? "font-semibold text-gray-200" : "font-semibold text-gray-700"}>Keyboard Shortcuts:</p>
                 <ul className={isDarkMode ? "text-gray-300" : "text-gray-600"}>
@@ -556,6 +792,7 @@ const NotepadModal = ({ showNotepad, setShowNotepad, notes, setNotes }) => {
                   <li>Ctrl+Z: Undo changes</li>
                   <li>Ctrl+F: Search notes</li>
                   <li>Ctrl+B: Toggle sidebar</li>
+                  <li>- ␣: Create bullet point</li>
                 </ul>
               </div>
             </div>
