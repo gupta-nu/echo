@@ -2,8 +2,6 @@
 
 A simple and efficient task manager built with React and Tailwind CSS, designed for users with ADHD and dyslexia. It uses the Eisenhower Matrix to prioritize tasks by urgency and importance, making organization straightforward. Features include quick task entry, drag-and-drop organization, and a clean, distraction-free interface for better focus and productivity.
 
-## Live Demo  
-[Check out the live version on Vercel](https://focuspocus.vercel.app/)  
 
 ---
 
@@ -84,19 +82,6 @@ Once completed, Vercel will provide a live URL where your app is hosted.
 
 ---
 
-## Future Enhancements
-
-- User Authentication & Multi-User Support  
-- Real-Time Collaboration  
-- Distributed Task Processing (Event Sourcing with Kafka, CQRS, Redis Caching)  
-- Offline-First Architecture  
-- Nested Subtasks (Ability to create sub-tasks within a task)  
-- Enhanced Notepad Features (Rich text formatting, tagging, and search,drag the notepad anywhere in the application,)  
-- to be able to add timeslot for exsiting tasks when doubleclick to implement the button below the edit to add timeslot
-- add note history . storing notes multiple notes
-- room feature where u can create a room to work on taskmangagment with group with code,there you can have collaborative notes
-- proper text editing and markdown for notepad
-- to be able to edit timeslot on a task
-- 
+#proj to aid my own dyslexia and ADHD 
 ---
 
