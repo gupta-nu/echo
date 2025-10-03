@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { motion, AnimatePresence } from "framer-motion";
-import { categories, timeSlots } from "./constants";
-import { mergeTimeSlots, formatTimeRange } from "./utils/helpers";
+import { AnimatePresence } from "framer-motion";
+import { categories } from "./constants";
+import { mergeTimeSlots } from "./utils/helpers";
 import CategoryColumn from "./components/CategoryColumn";
 import NotepadModal from "./components/NotepadModal";
 import TimeSlotModal from "./components/TimeSlotModal";
@@ -154,7 +154,6 @@ const App = () => {
           toIndex < 0 || toIndex > prev[toQuadrant].length) return prev;
 
       const newTasks = { ...prev };
-      const movedTask = newTasks[fromQuadrant][fromIndex];
 
       if (fromQuadrant === toQuadrant) {
         const tasksCopy = [...newTasks[fromQuadrant]];
