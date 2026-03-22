@@ -17,6 +17,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "autoprefixer": "^10.4.20",
+    "cmdk": "^1.1.1",
     "D": "^1.0.0",
     "framer-motion": "^12.4.12",
     "lucide-react": "^0.482.0",

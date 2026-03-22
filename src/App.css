@@ -2,24 +2,18 @@
   @apply min-h-screen w-full;
 }
 
-/* Custom animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Focus mode - hide everything except the target quadrant */
+.focus-mode .quadrant-card {
+  @apply opacity-30 scale-95 pointer-events-none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.task-item {
-  animation: fadeIn 0.3s ease-out;
+.focus-mode .quadrant-card.focused {
+  @apply opacity-100 scale-100 pointer-events-auto;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Drag and drop visual feedback */
-.drag-over {
-  @apply ring-2 ring-blue-500 bg-opacity-50;
-}
-
-.dragging {
-  @apply opacity-50 scale-95;
-}
-.text-black {
-  color: black !important;
+/* Smooth transitions for dark mode */
+.transition-theme {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
